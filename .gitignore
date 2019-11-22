@@ -2,3 +2,7 @@
 .idea/
 *.iml
 target/
+
+
+#Project related
+mongodb_data

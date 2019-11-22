@@ -12,6 +12,7 @@
         <module>client-service</module>
         <module>monitoring-service</module>
         <module>notifications-service</module>
+        <module>core</module>
     </modules>
 
     <properties>

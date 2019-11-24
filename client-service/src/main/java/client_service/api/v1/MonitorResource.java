@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.management.monitor.Monitor;
 import javax.validation.Valid;
+import javax.websocket.server.PathParam;
 import java.util.List;
 
 /**
@@ -13,7 +14,7 @@ import java.util.List;
  * Created On: 22-11-2019 00:33
  * Purpose: TODO:
  **/
-@RestController("/monitors")
+//@RestController("/monitors")
 public class MonitorResource {
 
     private final MonitorRepository monitorRepository;
@@ -30,8 +31,8 @@ public class MonitorResource {
         return null;
     }
 
-    @GetMapping
-    public Monitor getMonitor(@RequestParam("monitor_id") long id) {
+    @GetMapping("/{monitor_id}")
+    public Monitor getMonitor(@PathParam("monitor_id") long id) {
         //todo implement
         return null;
     }
@@ -42,18 +43,18 @@ public class MonitorResource {
         return null;
     }
 
-    @PutMapping
-    public void updateMonitor(@RequestParam("monitor_id") long id) {
+    @PutMapping("/{monitor_id}")
+    public void updateMonitor(@PathParam("monitor_id") long id) {
         //todo implement
     }
 
     @DeleteMapping
-    public void deleteMonitor(@RequestParam("monitor_id") long id) {
+    public void deleteMonitor(@PathParam("monitor_id") long id) {
         //todo implement
     }
 
-    @GetMapping("/status")
-    public void getMonitorStatus(@RequestParam("monitor_id") long id) {
+    @GetMapping("/{status}")
+    public void getMonitorStatus(@PathParam("monitor_id") long id) {
         //todo implement
     }
 }

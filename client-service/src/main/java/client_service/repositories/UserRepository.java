@@ -1,6 +1,7 @@
 package client_service.repositories;
 
 import client_service.entities.User;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
@@ -9,4 +10,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * Purpose: TODO:
  **/
 public interface UserRepository extends JpaRepository<User, Long> {
+
+    @Bean
+    public User findUserById(Long id);
+
+    @Bean
+    public boolean existsUserByUsername(String username);
+
 }

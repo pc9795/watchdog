@@ -9,4 +9,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * Purpose: TODO:
  **/
 public interface MonitorRepository extends JpaRepository<BaseMonitor, Long> {
+
 }

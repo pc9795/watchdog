@@ -1,0 +1,23 @@
+version: '3.1'
+
+services:
+  mongo:
+#    todo have to enable auth
+    image: mongo
+#    todo have to create a local mount point
+    ports:
+      - "27017:27017"
+
+#  redis:
+#    image: redis
+#    ports:
+#      - "6379:6379"
+
+  cockroachdb:
+    image: cockroachdb/cockroach
+#    todo have to enable auth
+    command: start-single-node --insecure
+#    todo have to create a local mount point
+    ports:
+      - "26257:26257"
+      - "8080:8080"

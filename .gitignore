@@ -1,0 +1,8 @@
+#Jetbrains related
+.idea/
+*.iml
+target/
+
+
+#Project related
+mongodb_data

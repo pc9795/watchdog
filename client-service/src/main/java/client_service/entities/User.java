@@ -74,8 +74,10 @@ public class User {
         this.monitors.forEach(monitor -> monitor.setUser(this));
     }
 
+
     public void addMonitor(BaseMonitor monitor) {
         this.monitors.add(monitor);
         monitor.setUser(this);
     }
+
 }

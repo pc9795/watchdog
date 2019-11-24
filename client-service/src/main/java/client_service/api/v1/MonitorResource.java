@@ -1,6 +1,10 @@
 package client_service.api.v1;
 
+import client_service.entities.HttpMonitor;
+import client_service.exceptions.UserDoesntExist;
 import client_service.repositories.MonitorRepository;
+import client_service.repositories.UserRepository;
+import client_service.utils.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,14 +18,17 @@ import java.util.List;
  * Created On: 22-11-2019 00:33
  * Purpose: TODO:
  **/
-//@RestController("/monitors")
+@RestController
+@RequestMapping(Constants.ApiV1Resource.MONITORS)
 public class MonitorResource {
 
     private final MonitorRepository monitorRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public MonitorResource(MonitorRepository monitorRepository) {
+    public MonitorResource(MonitorRepository monitorRepository, UserRepository userRepository) {
         this.monitorRepository = monitorRepository;
+        this.userRepository = userRepository;
     }
 
 
@@ -37,10 +44,17 @@ public class MonitorResource {
         return null;
     }
 
+    //@RequestMapping(method = RequestMethod.POST, params = {})
     @PostMapping
-    public Monitor addMonitor(@Valid Monitor monitor) {
+    public HttpMonitor addMonitor(@PathParam("http_monitor") @Valid HttpMonitor httpMonitor) throws UserDoesntExist {
         //todo implement
-        return null;
+        long monitors_UserId = httpMonitor.getUser().getId();
+        if(!userRepository.existsById(monitors_UserId)){
+            // Then user doesnt exist
+            throw new UserDoesntExist(monitors_UserId);
+        }
+        // Else user does exist, so add monitor
+        return monitorRepository.save(httpMonitor);
     }
 
     @PutMapping("/{monitor_id}")

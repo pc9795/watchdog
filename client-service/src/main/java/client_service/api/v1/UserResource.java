@@ -72,14 +72,14 @@ public class UserResource {
     private void throwException_IfUsernameAlreadyExist(String username) throws UserAlreadyExistException {
         if(userRepository.existsUserByUsername(username)){
             System.out.println("The username already exists");
-            throw new UserAlreadyExistException(String.format("User with username already exists: ", username));
+            throw new UserAlreadyExistException(username);
         }
     }
 
     private void throwException_IfUserIdDoesntExist(Long id) throws UserDoesntExist {
         if(!userRepository.existsById(id)){
             //then user exists already
-            throw new UserDoesntExist(String.format("User with id does not exist: ", id));
+            throw new UserDoesntExist(id);
         }
     }
 

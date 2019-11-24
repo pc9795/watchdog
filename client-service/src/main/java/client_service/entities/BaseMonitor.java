@@ -13,7 +13,9 @@ import javax.validation.constraints.PositiveOrZero;
  * Purpose: TODO:
  **/
 @Entity
-@Table(name = "monitors")
+@Table(name = "base_monitors",
+        uniqueConstraints ={@UniqueConstraint(columnNames = {"name","user_id"})}
+)
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class BaseMonitor {
 
@@ -21,13 +23,13 @@ public class BaseMonitor {
     @GeneratedValue
     private long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     @NotNull
     private String name;
 
     @Column(nullable = false)
     @NotNull
-    private String ipOrUrl;
+    private String ipOrUrlOrHost;
 
     @Column(nullable = false)
     @NotNull
@@ -56,11 +58,11 @@ public class BaseMonitor {
     }
 
     public String getIpOrUrl() {
-        return ipOrUrl;
+        return ipOrUrlOrHost;
     }
 
     public void setIpOrUrl(String ipOrUrl) {
-        this.ipOrUrl = ipOrUrl;
+        this.ipOrUrlOrHost = ipOrUrl;
     }
 
     public int getMonitoringInterval() {

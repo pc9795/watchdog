@@ -1,6 +1,7 @@
 package client_service.entities;
 
 import javax.persistence.Entity;
+import javax.persistence.Table;
 
 /**
  * Created By: Prashant Chaubey
@@ -8,5 +9,6 @@ import javax.persistence.Entity;
  * Purpose: TODO:
  **/
 @Entity
+@Table(name = "ping_monitors")
 public class PingMonitor extends BaseMonitor {
 }

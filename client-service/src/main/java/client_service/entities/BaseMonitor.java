@@ -12,15 +12,13 @@ import javax.validation.constraints.PositiveOrZero;
  * Created On: 22-11-2019 00:40
  * Purpose: TODO:
  **/
+// uniqueConstraints ={@UniqueConstraint(columnNames = {"name","user_id"}
 @Entity
-@Table(name = "base_monitors",
-        uniqueConstraints ={@UniqueConstraint(columnNames = {"name","user_id"})}
-)
+@Table
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class BaseMonitor {
 
     @Id
-    @GeneratedValue
     private long id;
 
     @Column(nullable = false)
@@ -37,8 +35,8 @@ public class BaseMonitor {
     private int monitoringInterval;
 
     @JsonIgnore
-    @JoinColumn(name = "user_id")
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private User user;
 
     public long getId() {
@@ -57,11 +55,11 @@ public class BaseMonitor {
         this.name = name;
     }
 
-    public String getIpOrUrl() {
+    public String getIpOrUrlOrHost() {
         return ipOrUrlOrHost;
     }
 
-    public void setIpOrUrl(String ipOrUrl) {
+    public void setIpOrUrlOrHost(String ipOrUrl) {
         this.ipOrUrlOrHost = ipOrUrl;
     }
 
@@ -79,5 +77,14 @@ public class BaseMonitor {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public long getUserId(){
+        return user.getId();
+    }
+
+
+    public String toString(){
+        return ("id: " + id + ", name:" + name + ", ipOrUrlOrHost:" + ipOrUrlOrHost + ", monitoringInterval:" + monitoringInterval);
     }
 }

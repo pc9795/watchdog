@@ -33,8 +33,19 @@ public class User {
 
     //BaseMonitor is weak entity so enabling orphan removal
     //CascadeType.ALL so that the persistence of parent can do so for children
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    //@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<BaseMonitor> monitors = new ArrayList<>();
+
+    public User(){
+
+    }
+
+    public User(@NotNull @Length(min = 5, max = 20) String username, @NotNull @Length(min = 8) String password) {
+        this.username = username;
+        this.password = password;
+    }
 
     public long getId() {
         return id;

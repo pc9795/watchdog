@@ -13,12 +13,12 @@ import javax.validation.constraints.PositiveOrZero;
  * Purpose: TODO:
  **/
 // uniqueConstraints ={@UniqueConstraint(columnNames = {"name","user_id"}
-@Entity
-@Table
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@Entity
 public class BaseMonitor {
 
     @Id
+    @GeneratedValue
     private long id;
 
     @Column(nullable = false)

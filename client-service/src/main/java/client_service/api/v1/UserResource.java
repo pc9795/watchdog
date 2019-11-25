@@ -1,9 +1,12 @@
 package client_service.api.v1;
 
+import client_service.entities.BaseMonitor;
+import client_service.entities.HttpMonitor;
 import client_service.entities.User;
 import client_service.exceptions.ResourceNotExistException;
 import client_service.exceptions.UserAlreadyExistException;
 import client_service.exceptions.UserDoesntExist;
+import client_service.repositories.MonitorRepository;
 import client_service.repositories.UserRepository;
 import client_service.utils.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.websocket.server.PathParam;
+import java.util.List;
 
 /**
  * Created By: Prashant Chaubey
@@ -22,10 +26,15 @@ import javax.websocket.server.PathParam;
 public class UserResource {
 
     private final UserRepository userRepository;
+    private final MonitorRepository monitorRepository;
 
     @Autowired
-    public UserResource(UserRepository userRepository) {
+    public UserResource(MonitorRepository monitorRepository, UserRepository userRepository) {
+        this.monitorRepository = monitorRepository;
         this.userRepository = userRepository;
+
+        this.userRepository.save(new User("ferdia", "passssssss"));
+        this.userRepository.save(new User("dummy", "passssssss"));
     }
 
     //@RequestMapping(value="/applications",method= RequestMethod.POST)
@@ -34,17 +43,36 @@ public class UserResource {
         //todo implement
         throwException_IfUsernameAlreadyExist(user.getUsername());
         // Create user
-        userRepository.save(user);
+        this.userRepository.save(user);
 
         return user;
     }
+
+    @PostMapping("/{user_id}/addMonitor/")
+    public HttpMonitor addMonitorToUser(@PathVariable("user_id") long userId, @PathParam("http_monitor") @Valid HttpMonitor httpMonitor) throws UserDoesntExist {
+        //todo implement
+        System.out.println("Got here");
+        if(!userRepository.existsById(userId)){
+            throw new UserDoesntExist(userId);
+        }
+        System.out.println("Got here 1");
+        // Then no error
+        User userWithId = userRepository.findUserById(userId);
+        System.out.println("Got here 2");
+        BaseMonitor theNewMonitor = monitorRepository.createMonitor(userWithId,httpMonitor);
+        System.out.println("Got here 3");
+        userWithId.addMonitor(theNewMonitor);
+        System.out.println("Got here 4");
+        return (HttpMonitor) theNewMonitor;
+    }
+
     //("/{user_id}")
     @GetMapping
     public User getUser(@PathParam("user_id") long id) throws UserDoesntExist {
         //todo implement
         throwException_IfUserIdDoesntExist(id);
 
-        return userRepository.findUserById(id);
+        return this.userRepository.findUserById(id);
     }
 
     @PutMapping()
@@ -54,10 +82,10 @@ public class UserResource {
         throwException_IfUsernameAlreadyExist(user.getUsername());
 
         // then update the user
-        User updatedUser = userRepository.findUserById(id);
+        User updatedUser = this.userRepository.findUserById(id);
         updatedUser.setUsername(user.getUsername());
         updatedUser.setPassword(user.getPassword());
-        userRepository.save(updatedUser);
+        this.userRepository.save(updatedUser);
     }
 
     @DeleteMapping
@@ -65,7 +93,7 @@ public class UserResource {
         //todo implement
         throwException_IfUserIdDoesntExist(id);
         // then delete user
-        userRepository.deleteById(id);
+        this.userRepository.deleteById(id);
 
     }
 

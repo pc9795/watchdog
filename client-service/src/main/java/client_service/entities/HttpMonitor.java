@@ -1,6 +1,7 @@
 package client_service.entities;
 
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -12,11 +13,10 @@ import javax.validation.constraints.Positive;
  * Purpose: TODO:
  **/
 @Entity
-@Table(name = "http_monitors")
+@DiscriminatorValue("http_monitor")
 public class HttpMonitor extends BaseMonitor {
 
-    @NotNull
-    @Column(nullable = false)
+    @Column()
     @Positive
     private int expectedHttpStatusCode;
 

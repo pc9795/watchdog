@@ -1,8 +1,7 @@
 package client_service.api.v1;
 
-import client_service.entities.BaseMonitor;
-import client_service.entities.HttpMonitor;
-import client_service.entities.User;
+import client_service.entities.*;
+import client_service.exceptions.MonitorDoesExistOrDoesNotBelongToUser;
 import client_service.exceptions.ResourceNotExistException;
 import client_service.exceptions.UserAlreadyExistException;
 import client_service.exceptions.UserDoesntExist;
@@ -38,7 +37,7 @@ public class UserResource {
     }
 
     //@RequestMapping(value="/applications",method= RequestMethod.POST)
-    @PostMapping
+    @PostMapping("/create_user")
     public User addUser(@PathParam("user") @Valid User user) throws UserAlreadyExistException {
         //todo implement
         throwException_IfUsernameAlreadyExist(user.getUsername());
@@ -48,36 +47,16 @@ public class UserResource {
         return user;
     }
 
-    @PostMapping("/{user_id}/addMonitor/")
-    public HttpMonitor addMonitorToUser(@PathVariable("user_id") long userId, @PathParam("http_monitor") @Valid HttpMonitor httpMonitor) throws UserDoesntExist {
-        //todo implement
-        System.out.println("Got here");
-        if(!userRepository.existsById(userId)){
-            throw new UserDoesntExist(userId);
-        }
-        System.out.println("Got here 1");
-        // Then no error
-        User userWithId = userRepository.findUserById(userId);
-        System.out.println("Got here 2");
-        BaseMonitor theNewMonitor = monitorRepository.createMonitor(userWithId,httpMonitor);
-        System.out.println("Got here 3");
-        userWithId.addMonitor(theNewMonitor);
-        System.out.println("Got here 4");
-        return (HttpMonitor) theNewMonitor;
-    }
-
-    //("/{user_id}")
-    @GetMapping
-    public User getUser(@PathParam("user_id") long id) throws UserDoesntExist {
-        //todo implement
+    @GetMapping("/{user_id}")
+    public User getUser(@PathVariable("user_id") long id) throws UserDoesntExist {
         throwException_IfUserIdDoesntExist(id);
 
         return this.userRepository.findUserById(id);
     }
 
-    @PutMapping()
-    public void updateUser(@PathParam("user_id") long id, @PathParam("user") User user) throws UserDoesntExist, UserAlreadyExistException {
-        //todo implement
+    @PutMapping("/{user_id}/updateUser")
+    public void updateUser(@PathVariable("user_id") long id, @PathParam("user") User user) throws UserDoesntExist, UserAlreadyExistException {
+        //todo: this allows user to update username and password, mite need more
         throwException_IfUserIdDoesntExist(id);
         throwException_IfUsernameAlreadyExist(user.getUsername());
 
@@ -88,14 +67,60 @@ public class UserResource {
         this.userRepository.save(updatedUser);
     }
 
-    @DeleteMapping
-    public void deleteUser(@PathParam("user_id") long id) throws UserDoesntExist {
-        //todo implement
+    @DeleteMapping("/{user_id}/deleteUser")
+    public void deleteUser(@PathVariable("user_id") long id) throws UserDoesntExist {
         throwException_IfUserIdDoesntExist(id);
         // then delete user
         this.userRepository.deleteById(id);
 
     }
+
+    // Adding monitor Methods:
+    @PostMapping("/{user_id}/addMonitor/http")
+    public HttpMonitor addHttpMonitorToUser(@PathVariable("user_id") long userId, @PathParam("http_monitor") @Valid HttpMonitor httpMonitor) throws UserDoesntExist {
+        return (HttpMonitor) addMonitorToUser(userId,httpMonitor);
+    }
+
+    @PostMapping("/{user_id}/addMonitor/socket")
+    public SocketMonitor addSocketMonitorToUser(@PathVariable("user_id") long userId, @PathParam("socket_monitor") @Valid SocketMonitor socketMonitor) throws UserDoesntExist {
+        return (SocketMonitor) addMonitorToUser(userId,socketMonitor);
+
+    }
+
+    @PostMapping("/{user_id}/addMonitor/ping")
+    public PingMonitor addPingMonitorToUser(@PathVariable("user_id") long userId, @PathParam("ping_monitor") @Valid PingMonitor pingMonitor) throws UserDoesntExist {
+        return (PingMonitor) addMonitorToUser(userId,pingMonitor);
+    }
+
+    private BaseMonitor addMonitorToUser(long userId, BaseMonitor monitor) throws UserDoesntExist {
+        if(!userRepository.existsById(userId)){
+            throw new UserDoesntExist(userId);
+        }
+        // Then no error, so add the monitor
+        User userWithId = userRepository.findUserById(userId);
+        BaseMonitor theNewMonitor = monitorRepository.createMonitor(userWithId,monitor);
+        userWithId.addMonitor(theNewMonitor);
+        return (BaseMonitor) theNewMonitor;
+    }
+
+    // end of adding monitor methods
+    // deleteing monitor methods
+    @DeleteMapping("/{user_id}/deleteMonitor/{monitor_id}")
+    public void deleteAUsersMonitor(@PathVariable("user_id") long userId, @PathVariable("monitor_id") long monitorId ) throws MonitorDoesExistOrDoesNotBelongToUser {
+        if(monitorRepository.existsById(monitorId)){
+            BaseMonitor theMonitorToDelete = monitorRepository.findById(monitorId);
+            if(theMonitorToDelete.getUser().getId() == userId){
+                monitorRepository.deleteById(monitorId);
+                return;
+            }
+        }
+        // Else throw exception
+        throw new MonitorDoesExistOrDoesNotBelongToUser(userId,monitorId);
+    }
+
+
+
+    // end of deleting monitor methods
 
     private void throwException_IfUsernameAlreadyExist(String username) throws UserAlreadyExistException {
         if(userRepository.existsUserByUsername(username)){

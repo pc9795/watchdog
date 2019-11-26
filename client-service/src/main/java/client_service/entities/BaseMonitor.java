@@ -13,24 +13,24 @@ import javax.validation.constraints.PositiveOrZero;
  * Purpose: TODO:
  **/
 // uniqueConstraints ={@UniqueConstraint(columnNames = {"name","user_id"}
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@Table(name = "base_monitors")
+@DiscriminatorColumn(name = "monitor_type")
 public class BaseMonitor {
 
     @Id
     @GeneratedValue
+    @Column
     private long id;
 
-    @Column(nullable = false)
-    @NotNull
+    @Column()
     private String name;
 
-    @Column(nullable = false)
-    @NotNull
+    @Column()
     private String ipOrUrlOrHost;
 
-    @Column(nullable = false)
-    @NotNull
+    @Column()
     @Positive
     private int monitoringInterval;
 

@@ -26,12 +26,10 @@ import java.util.Optional;
 public class MonitorResource {
 
     private final MonitorRepository monitorRepository;
-    private final UserRepository userRepository;
 
     @Autowired
-    public MonitorResource(MonitorRepository monitorRepository, UserRepository userRepository) {
+    public MonitorResource(MonitorRepository monitorRepository) {
         this.monitorRepository = monitorRepository;
-        this.userRepository = userRepository;
     }
 
     public Optional<BaseMonitor> getBaseMonitorById(Long baseMonitorId) throws ResourceNotExistException {
@@ -45,12 +43,21 @@ public class MonitorResource {
     @GetMapping
     public List<Monitor> getAllMonitors() {
         //todo implement
+
+        return null;
+    }
+
+    @GetMapping("/{user_id}")
+    public List<BaseMonitor> getAllMonitorsFromUser(@PathParam("monitor_id") long id){
+
         return null;
     }
 
     @GetMapping("/{monitor_id}")
     public Monitor getMonitorById(@PathParam("monitor_id") long id) {
         //todo implement
+
+
         return null;
     }
 

@@ -1,5 +1,6 @@
 package client_service.entities;
 
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -9,6 +10,6 @@ import javax.persistence.Table;
  * Purpose: TODO:
  **/
 @Entity
-@Table(name = "ping_monitors")
+@DiscriminatorValue("ping_monitor")
 public class PingMonitor extends BaseMonitor {
 }

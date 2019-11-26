@@ -33,61 +33,32 @@ public class MonitorResource {
     }
 
     public Optional<BaseMonitor> getBaseMonitorById(Long baseMonitorId) throws ResourceNotExistException {
-        if(monitorRepository.existsById(baseMonitorId)){
-            throw  new ResourceNotExistException("monitor with " + baseMonitorId + " Does not exists");
+        if(monitorRepository.existsBaseMonitorById(baseMonitorId)){
+            throw new ResourceNotExistException("monitor with " + baseMonitorId + " Does not exists");
         }
         return monitorRepository.findById(baseMonitorId);
     }
 
 
-    @GetMapping
-    public List<Monitor> getAllMonitors() {
-        //todo implement
-
-        return null;
+    @GetMapping("/getAll")
+    public List<BaseMonitor> getAllMonitors() {
+        return monitorRepository.findAll();
     }
 
-    @GetMapping("/{user_id}")
-    public List<BaseMonitor> getAllMonitorsFromUser(@PathParam("monitor_id") long id){
-
-        return null;
+    @GetMapping("/getMonitor/{monitor_id}")
+    public BaseMonitor getMonitorById(@PathVariable("monitor_id") long monitorId) throws ResourceNotExistException {
+        if(!monitorRepository.existsBaseMonitorById(monitorId)){
+            throw new ResourceNotExistException("monitor with id does not exist: " + monitorId);
+        }
+        return monitorRepository.findById(monitorId);
     }
-
-    @GetMapping("/{monitor_id}")
-    public Monitor getMonitorById(@PathParam("monitor_id") long id) {
-        //todo implement
-
-
-        return null;
-    }
-
-    @GetMapping("/{user_id}/get_monitors/")
-    public Monitor getMonitorsByUserId(@PathParam("user_id") long id) {
-        //todo implement
-
-
-        return null;
-    }
-
-    //@RequestMapping(method = RequestMethod.POST, params = {})
-//    @PostMapping("add_monitor/")
-//    public HttpMonitor addMonitor(@PathParam("http_monitor") @Valid HttpMonitor httpMonitor) throws UserDoesntExist {
-//        //todo implement
-//
-//        return monitorRepository.save(httpMonitor);
-//    }
 
     @PutMapping("/{monitor_id}")
     public void updateMonitor(@PathParam("monitor_id") long id) {
         //todo implement
     }
 
-    @DeleteMapping
-    public void deleteMonitor(@PathParam("monitor_id") long id) {
-        //todo implement
-    }
-
-    @GetMapping("/{status}")
+    @GetMapping("/{monitor_id}")
     public void getMonitorStatus(@PathParam("monitor_id") long id) {
         //todo implement
     }

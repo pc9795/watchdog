@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import javax.websocket.server.PathParam;
+import java.util.List;
 
 /**
  * Created By: Prashant Chaubey
@@ -27,6 +28,14 @@ public interface MonitorRepository extends JpaRepository<BaseMonitor, Long>, Jpa
     }
 
     BaseMonitor findById(long id);
+
+    @Bean
+    boolean existsBaseMonitorById(long id);
+
+//    @Query("SELECT * FROM base_monitors where user_id = ?0")
+//    List<BaseMonitor> findBaseMonitorsByUserId(long userId);
+
+    List<BaseMonitor> findAll();
 
 //    @Query("SELECT * from base_monitor m where m.user.id=:userId")
 //    BaseMonitor getMonitorBelongingToId(@Param("userId") long userId);

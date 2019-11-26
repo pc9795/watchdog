@@ -11,6 +11,7 @@ import client_service.utils.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.DiscriminatorValue;
 import javax.validation.Valid;
 import javax.websocket.server.PathParam;
 import java.util.List;
@@ -75,9 +76,29 @@ public class UserResource {
 
     }
 
+    // user monitor requests:
+    @GetMapping("/{user_id}/getMonitors")
+    public List<BaseMonitor> getUserMonitors(@PathVariable("user_id") long userId) throws UserDoesntExist {
+        return getUser(userId).getMonitors();
+    }
+
+    @GetMapping("/{user_id}/{monitor_id}")
+    public BaseMonitor getUserMonitorFromId(@PathVariable("user_id") long userId, @PathVariable("monitor_id") long monitorId) throws UserDoesntExist, MonitorDoesExistOrDoesNotBelongToUser {
+        if(monitorRepository.existsById(monitorId)) {
+            BaseMonitor usersMonitor = (BaseMonitor) monitorRepository.findById(monitorId);
+            if (usersMonitor.getUser().getId() == userId) {
+                return usersMonitor;
+            }
+        }
+        // Else throw exception
+        throw new MonitorDoesExistOrDoesNotBelongToUser(userId,monitorId);
+    }
+
     // Adding monitor Methods:
+
     @PostMapping("/{user_id}/addMonitor/http")
     public HttpMonitor addHttpMonitorToUser(@PathVariable("user_id") long userId, @PathParam("http_monitor") @Valid HttpMonitor httpMonitor) throws UserDoesntExist {
+        System.out.println("the type is " + httpMonitor.getClass().getAnnotation(DiscriminatorValue.class).value().toString());
         return (HttpMonitor) addMonitorToUser(userId,httpMonitor);
     }
 
@@ -104,6 +125,41 @@ public class UserResource {
     }
 
     // end of adding monitor methods
+
+    // updateing monitor methods
+    @PutMapping("/{user_id}/updateHttpMonitor/{monitor_id}")
+    public void updateAUsersHttpMonitor(@PathVariable("user_id") long userId, @PathVariable("monitor_id") long monitorId, @PathParam("http_monitor") HttpMonitor updatedHttpMonitor) throws UserDoesntExist, UserAlreadyExistException, MonitorDoesExistOrDoesNotBelongToUser {
+        HttpMonitor monitorToUpdate = (HttpMonitor)updateAUsersMonitor(userId, monitorId, updatedHttpMonitor);
+        monitorToUpdate.setExpectedHttpStatusCode(updatedHttpMonitor.getExpectedHttpStatusCode());
+        this.monitorRepository.save(monitorToUpdate);
+    }
+
+    @PutMapping("/{user_id}/updateSocketMonitor/{monitor_id}")
+    public void updateAUsersSocketMonitor(@PathVariable("user_id") long userId, @PathVariable("monitor_id") long monitorId, @PathParam("socket_monitor") SocketMonitor socketMonitor) throws UserDoesntExist, UserAlreadyExistException, MonitorDoesExistOrDoesNotBelongToUser {
+        SocketMonitor monitorToUpdate = (SocketMonitor)updateAUsersMonitor(userId, monitorId, socketMonitor);
+        monitorToUpdate.setSocketPort(socketMonitor.getSocketPort());
+        this.monitorRepository.save(monitorToUpdate);
+    }
+
+    @PutMapping("/{user_id}/updatePingMonitor/{monitor_id}")
+    public void updateAUsersPingMonitor(@PathVariable("user_id") long userId, @PathVariable("monitor_id") long monitorId, @PathParam("ping_monitor") PingMonitor pingMonitor) throws UserDoesntExist, UserAlreadyExistException, MonitorDoesExistOrDoesNotBelongToUser {
+        this.monitorRepository.save(updateAUsersMonitor(userId, monitorId, pingMonitor));
+    }
+
+    private BaseMonitor updateAUsersMonitor(long userId, long monitorId, BaseMonitor updatedMonitor) throws MonitorDoesExistOrDoesNotBelongToUser {
+        if(monitorRepository.existsById(monitorId)){
+            HttpMonitor monitorToUpdate = (HttpMonitor)monitorRepository.findById(monitorId);
+            if(monitorToUpdate.getUser().getId() == userId){
+                monitorToUpdate.setName(updatedMonitor.getName());
+                monitorToUpdate.setIpOrUrlOrHost(updatedMonitor.getIpOrUrlOrHost());
+                monitorToUpdate.setMonitoringInterval(updatedMonitor.getMonitoringInterval());
+                return monitorToUpdate;
+            }
+        }
+        // Else throw exception
+        throw new MonitorDoesExistOrDoesNotBelongToUser(userId,monitorId);
+    }
+
     // deleteing monitor methods
     @DeleteMapping("/{user_id}/deleteMonitor/{monitor_id}")
     public void deleteAUsersMonitor(@PathVariable("user_id") long userId, @PathVariable("monitor_id") long monitorId ) throws MonitorDoesExistOrDoesNotBelongToUser {

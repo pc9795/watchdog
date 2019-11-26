@@ -1,7 +1,9 @@
 package client_service.entities;
 
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 
@@ -11,10 +13,10 @@ import javax.validation.constraints.Positive;
  * Purpose: TODO:
  **/
 @Entity
+@DiscriminatorValue("socket_monitor")
 public class SocketMonitor extends BaseMonitor {
 
-    @NotNull
-    @Column(nullable = false)
+    @Column()
     @Positive
     private int socketPort;
 

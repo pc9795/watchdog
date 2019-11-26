@@ -12,31 +12,31 @@ import javax.validation.constraints.PositiveOrZero;
  * Created On: 22-11-2019 00:40
  * Purpose: TODO:
  **/
+// uniqueConstraints ={@UniqueConstraint(columnNames = {"name","user_id"}
 @Entity
-@Table(name = "monitors")
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@Table(name = "base_monitors")
+@DiscriminatorColumn(name = "monitor_type")
 public class BaseMonitor {
 
     @Id
     @GeneratedValue
+    @Column
     private long id;
 
-    @Column(nullable = false, unique = true)
-    @NotNull
+    @Column()
     private String name;
 
-    @Column(nullable = false)
-    @NotNull
-    private String ipOrUrl;
+    @Column()
+    private String ipOrUrlOrHost;
 
-    @Column(nullable = false)
-    @NotNull
+    @Column()
     @Positive
     private int monitoringInterval;
 
     @JsonIgnore
-    @JoinColumn(name = "user_id")
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private User user;
 
     public long getId() {
@@ -55,12 +55,12 @@ public class BaseMonitor {
         this.name = name;
     }
 
-    public String getIpOrUrl() {
-        return ipOrUrl;
+    public String getIpOrUrlOrHost() {
+        return ipOrUrlOrHost;
     }
 
-    public void setIpOrUrl(String ipOrUrl) {
-        this.ipOrUrl = ipOrUrl;
+    public void setIpOrUrlOrHost(String ipOrUrl) {
+        this.ipOrUrlOrHost = ipOrUrl;
     }
 
     public int getMonitoringInterval() {
@@ -77,5 +77,14 @@ public class BaseMonitor {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public long getUserId(){
+        return user.getId();
+    }
+
+
+    public String toString(){
+        return ("id: " + id + ", name:" + name + ", ipOrUrlOrHost:" + ipOrUrlOrHost + ", monitoringInterval:" + monitoringInterval);
     }
 }

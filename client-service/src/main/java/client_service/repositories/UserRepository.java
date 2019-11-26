@@ -1,7 +1,10 @@
 package client_service.repositories;
 
 import client_service.entities.User;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
 
 /**
  * Created By: Prashant Chaubey
@@ -9,4 +12,19 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * Purpose: TODO:
  **/
 public interface UserRepository extends JpaRepository<User, Long> {
+
+    @Bean
+    public User findUserById(Long id);
+
+    @Bean
+    public boolean existsUserByUsername(String username);
+
+//    public List<User> getUsers(){
+//        return userRepository.findAll();
+//    }
+//
+//    public User createUser(User user){
+//        return userRepository.save(user);
+//    }
+
 }

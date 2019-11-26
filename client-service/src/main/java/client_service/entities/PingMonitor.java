@@ -1,6 +1,8 @@
 package client_service.entities;
 
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.Table;
 
 /**
  * Created By: Prashant Chaubey
@@ -8,5 +10,6 @@ import javax.persistence.Entity;
  * Purpose: TODO:
  **/
 @Entity
+@DiscriminatorValue("ping_monitor")
 public class PingMonitor extends BaseMonitor {
 }

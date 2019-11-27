@@ -263,7 +263,7 @@ public class UserResource {
         // Else throw exception
         throw new MonitorDoesExistOrDoesNotBelongToUser(userId,monitorId);
     }
-    
+
     // end of deleting monitor methods
     // END MONITOR requests;
 

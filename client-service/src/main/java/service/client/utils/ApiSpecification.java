@@ -1,6 +1,7 @@
 package service.client.utils;
 
 import org.springframework.data.jpa.domain.Specification;
+import service.client.exceptions.InvalidSearchAttributeException;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -32,7 +33,12 @@ public class ApiSpecification<T> implements Specification<T> {
     public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
 
         String key = searchCriteria.getKey();
-        Object value = convertIfPossible(searchCriteria.getKey(), searchCriteria.getValue());
+        Object value = null;
+        try {
+            value = convertIfPossible(searchCriteria.getKey(), searchCriteria.getValue());
+        } catch (InvalidSearchAttributeException e) {
+            e.printStackTrace();
+        }
 
         switch (searchCriteria.getOperation()) {
             case EQUALS:
@@ -56,7 +62,7 @@ public class ApiSpecification<T> implements Specification<T> {
      * @param value
      * @return
      */
-    private Object convertIfPossible(String key, Object value) {
+    private Object convertIfPossible(String key, Object value) throws InvalidSearchAttributeException {
         return converter == null ? value : converter.processAttr(key, value);
     }
 }

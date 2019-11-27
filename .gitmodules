@@ -1,0 +1,3 @@
+[submodule "Watchdogs_FrontEnd"]
+	path = Watchdogs_FrontEnd
+	url = git@github.com:Ferdia-Fagan/Watchdogs_FrontEnd.git

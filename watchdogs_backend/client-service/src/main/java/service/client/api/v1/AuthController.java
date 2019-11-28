@@ -19,6 +19,7 @@ import javax.validation.ValidationException;
 import javax.validation.Validator;
 
 import org.springframework.web.bind.annotation.RestController;
+import service.client.exceptions.UsernamePasswordIncorrect;
 import service.client.repositories.UserRepository;
 import service.client.utils.Constants;
 import service.client.utils.Utils;
@@ -28,7 +29,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(Constants.ApiV1Resource.USER)
 public class AuthController {
 
     private final UserRepository userRepository;
@@ -46,11 +46,17 @@ public class AuthController {
     @ResponseStatus(HttpStatus.CREATED)
     public User register(@RequestParam String username, @RequestParam String password)
             throws UserAlreadyExistException {
+        System.out.println("gots here 1");
+
         if (userRepository.findUserByUsername(username) != null) {
+            System.out.println("gots here 353");
             throw new UserAlreadyExistException();
         }
+        System.out.println("gots here 2");
+
         User user = new User(username.trim(), password.trim());
         user.setRoles(Collections.singletonList(new UserRole(UserRole.UserRoleType.REGULAR)));
+        System.out.println("gots here 3");
 
         //Check for any violations in constraints.
         Set<ConstraintViolation<User>> violations = validator.validate(user);
@@ -60,6 +66,7 @@ public class AuthController {
                             map(violation -> violation.getPropertyPath().toString() + " " + violation.getMessage()).
                             collect(Collectors.toList()), ","));
         }
+        System.out.println("gots here 4");
 
         //Encoding after checking validation
         user.setPassword(passwordEncoder.encode(password));
@@ -68,13 +75,13 @@ public class AuthController {
 
     @PostMapping("/login")
     public User login(HttpServletRequest request, @RequestParam String username, @RequestParam String password)
-            throws ServletException {
+            throws ServletException, UsernamePasswordIncorrect {
         User user = userRepository.findUserByUsername(username);
         if (user == null) {
             throw new BadCredentialsException(Constants.ErrorMsg.BAD_CREDENTIALS);
         }
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new BadCredentialsException(Constants.ErrorMsg.BAD_CREDENTIALS);
+            throw new UsernamePasswordIncorrect();
         }
         request.login(username, password);
         return user;

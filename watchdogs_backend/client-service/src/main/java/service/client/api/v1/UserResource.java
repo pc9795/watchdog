@@ -44,9 +44,6 @@ public class UserResource {
         this.userRepository = userRepository;
 
         this.passwordEncoder = passwordEncoder;
-
-//        this.userRepository.save(new User("ferdia", "passssssss"));
-//        this.userRepository.save(new User("dummy", "passssssss"));
     }
 
     // START USER requests:
@@ -58,7 +55,11 @@ public class UserResource {
             throw new InvalidDataException("Non admin user can't add an admin user");
         }
         // Check if user with username already exists
-        throwException_IfUsernameAlreadyExist(passwordEncoder.encode(user.getUsername()));
+        if(userRepository.existsUserByUsername(user.getUsername())){
+            throw new UserAlreadyExistException(String.format("User wih username: %s already exists",
+                    user.getUsername()));
+        }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         // Create user
         return this.userRepository.save(user);
     }

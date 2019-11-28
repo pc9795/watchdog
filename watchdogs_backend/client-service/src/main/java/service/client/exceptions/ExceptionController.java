@@ -119,10 +119,13 @@ public class ExceptionController {
     }
 
     @ExceptionHandler(UsernamePasswordIncorrect.class)
-    public void handleUserDoesntExistException(Exception e, HttpServletResponse response) throws IOException {
+    public void handleUsernamePasswordIncorrectException(Exception e, HttpServletResponse response) throws IOException {
+        System.out.println("exception reached here");
         e.printStackTrace();
-        createJSONErrorResponse(HttpServletResponse.SC_UNAUTHORIZED, Constants.ErrorMsg.INCORRECT_PASSWORD,
+        System.out.println("exception reached here");
+        createJSONErrorResponse(HttpServletResponse.SC_UNAUTHORIZED, Constants.ErrorMsg.UNAUTHORIZED,
                 response);
+        System.out.println("exception reached here");
     }
 
 

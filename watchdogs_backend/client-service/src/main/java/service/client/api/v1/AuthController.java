@@ -49,7 +49,7 @@ public class AuthController {
         System.out.println("gots here 1");
 
         if (userRepository.findUserByUsername(username) != null) {
-            System.out.println("gots here 353");
+            System.out.println("gots here 353: " + username);
             throw new UserAlreadyExistException();
         }
         System.out.println("gots here 2");
@@ -78,12 +78,17 @@ public class AuthController {
             throws ServletException, UsernamePasswordIncorrect {
         User user = userRepository.findUserByUsername(username);
         if (user == null) {
+            System.out.println("user doesnt exist");
             throw new BadCredentialsException(Constants.ErrorMsg.BAD_CREDENTIALS);
         }
         if (!passwordEncoder.matches(password, user.getPassword())) {
+            System.out.println("passwords dont match : " + password + "  " + user.getPassword());
             throw new UsernamePasswordIncorrect();
         }
+        System.out.println("passwords match : " +user.getId() + "   " + user.getUsername() + "  " + user.getPassword() + "   " + (user.getRoles().get(0)).getType());
         request.login(username, password);
+        System.out.println("The user has succesfully logged in + " + user.getUsername() + "   " + user.getPassword());
+        System.out.println("f");
         return user;
     }
 }

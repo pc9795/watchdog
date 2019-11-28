@@ -150,16 +150,24 @@ public class UserResource {
             throw new ForbiddenResourceException();
         }
 
-        Specification<BaseMonitor> spec = search == null ? null : SpecificationUtils.getSpecFromQuery(search, SpecificationUtils::mealAttributeConverter);
+//        //Specification<BaseMonitor> spec = search == null ? null : SpecificationUtils.getSpecFromQuery(search, SpecificationUtils::mealAttributeConverter);
+//        throwException_IfUserIdDoesntExist(userId);     // check if user with id exists
+//        User theUser = userRepository.findUserById(userId);
+//        if (!isAdmin && !principal.getName().equals(theUser.getUsername())) {
+//            throw new ForbiddenResourceException();
+//        }
+//        //Add the user to the specification.
+//        Specification<BaseMonitor> userSpec = new ApiSpecification<>(new SearchCriteria("user", theUser, "eq"));
+//        spec = spec == null ? userSpec : spec.and(userSpec);
+//        return monitorRepository.findAll(spec, pageable).getContent();
+
         throwException_IfUserIdDoesntExist(userId);     // check if user with id exists
         User theUser = userRepository.findUserById(userId);
         if (!isAdmin && !principal.getName().equals(theUser.getUsername())) {
             throw new ForbiddenResourceException();
         }
         //Add the user to the specification.
-        Specification<BaseMonitor> userSpec = new ApiSpecification<>(new SearchCriteria("user", theUser, "eq"));
-        spec = spec == null ? userSpec : spec.and(userSpec);
-        return monitorRepository.findAll(spec, pageable).getContent();
+        return theUser.getMonitors();
     }
 
     @GetMapping("/{user_id}/{monitor_id}")

@@ -256,34 +256,4 @@ public class SpecificationUtils {
         throw new InvalidSearchAttributeException(String.format("Attribute'%s' is not mapped", key));
     }
 
-    /**
-     * Attribute converter for Meal entity. We know that the value will be string.
-     *
-     * @param key
-     * @param value
-     * @return
-     */
-    public static Object mealAttributeConverter(String key, Object value) throws InvalidSearchAttributeException {
-        try {
-            switch (key) {
-                case "date":
-                    return LocalDate.parse(value.toString());
-                case "time":
-                    return LocalTime.parse(value.toString());
-                case "text":
-                    return value;
-                case "calories":
-                    return Integer.parseInt(value.toString());
-                case "lessThanExpected":
-                    return Boolean.parseBoolean(value.toString());
-            }
-
-        } catch (Exception e) {
-            throw new InvalidSearchAttributeException(String.format("Not able to convert Value: %s of Attribute: %s",
-                    value, key));
-        }
-        // When nothing is mapped in switch.
-        throw new InvalidSearchAttributeException(String.format("Attribute '%s' is not mapped", key));
-    }
-
 }

@@ -17,6 +17,11 @@ import service.client.utils.Utils;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
+/**
+ * Created By: Prashant Chaubey
+ * Created On: 25-10-2019 19:33
+ * Purpose: Spring security configuration.
+ **/
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
@@ -64,15 +69,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 }).
                 and().
                 authorizeRequests(). // Authorization
-                antMatchers(Constants.ApiV1Resource.MONITORS + "/**").
-                hasAnyRole("" + UserRole.UserRoleType.ADMIN, "" + UserRole.UserRoleType.REGULAR).
                 antMatchers(Constants.ApiV1Resource.USER + "/**").
-                hasAnyRole("" + UserRole.UserRoleType.ADMIN, "" + UserRole.UserRoleType.USER_MANAGER).
+                hasAnyRole("" + UserRole.UserRoleType.ADMIN, "" + UserRole.UserRoleType.REGULAR).
                 and().
                 logout().permitAll().
                 logoutSuccessHandler(
                         ((request, response, authentication) -> new HttpStatusReturningLogoutSuccessHandler())
                 );
+//
+//        http
+//                .antMatcher(Constants.ApiV1Resource.USER);
     }
 
     /**

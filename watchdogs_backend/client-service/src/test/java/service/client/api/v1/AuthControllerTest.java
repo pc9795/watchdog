@@ -132,21 +132,40 @@ public class AuthControllerTest {
 
     @Test
     public void test_Login_Successfull() throws Exception {
-        User theUser = new User("ferdia", "password");
-        List<UserRole> theListOfUsersRoles = new ArrayList<UserRole>();
-        theListOfUsersRoles.add(new UserRole(UserRole.UserRoleType.ADMIN));
-        theUser.setRoles(theListOfUsersRoles);
 
-        BDDMockito.given(repository.findUserByUsername("ferdia")).
-                willReturn(theUser);
+        BDDMockito.given(repository.findUserByUsername("existingUser")).
+                willReturn(null);
 
-        //Simulating the case where encoded password is different.
         BDDMockito.when(passwordEncoder.encode("password")).
                 then((invocationOnMock) -> invocationOnMock.getArgument(0));
-        BDDMockito.when(passwordEncoder.matches(Mockito.anyString(), Mockito.anyString()))
-                .then(invocation -> invocation.getArgument(0).equals(invocation.getArgument(1)));
         BDDMockito.when(repository.save(Mockito.any(User.class))).
                 then((invocationOnMock) -> invocationOnMock.getArgument(0));
+
+        mvc.perform(post("/register").
+                param("username", "existingUser").param("password", "password")).
+                andExpect(status().isCreated()).
+                andExpect(jsonPath("$.username").value("existingUser")).
+                andExpect(jsonPath("$.roles[0].type").value("REGULAR"));
+
+
+
+
+
+
+
+//        User theUser = new User("existingUser", "password");
+//        List<UserRole> theListOfUsersRoles = new ArrayList<UserRole>();
+//        theListOfUsersRoles.add(new UserRole(UserRole.UserRoleType.ADMIN));
+//        theUser.setRoles(theListOfUsersRoles);
+//
+//        BDDMockito.given(repository.findUserByUsername("existingUser")).
+//                willReturn(theUser);
+//
+//        //Simulating the case where encoded password is different.
+//        BDDMockito.when(passwordEncoder.encode("password")).
+//                then((invocationOnMock) -> invocationOnMock.getArgument(0));
+//        BDDMockito.when(passwordEncoder.matches(Mockito.anyString(), Mockito.anyString()))
+//                .then(invocation -> invocation.getArgument(0).equals(invocation.getArgument(1)));
 
 
 

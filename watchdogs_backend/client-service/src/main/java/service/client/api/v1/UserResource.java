@@ -44,9 +44,6 @@ public class UserResource {
         this.userRepository = userRepository;
 
         this.passwordEncoder = passwordEncoder;
-
-//        this.userRepository.save(new User("ferdia", "passssssss"));
-//        this.userRepository.save(new User("dummy", "passssssss"));
     }
 
     // START USER requests:
@@ -58,7 +55,11 @@ public class UserResource {
             throw new InvalidDataException("Non admin user can't add an admin user");
         }
         // Check if user with username already exists
-        throwException_IfUsernameAlreadyExist(passwordEncoder.encode(user.getUsername()));
+        if(userRepository.existsUserByUsername(user.getUsername())){
+            throw new UserAlreadyExistException(String.format("User wih username: %s already exists",
+                    user.getUsername()));
+        }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         // Create user
         return this.userRepository.save(user);
     }
@@ -149,16 +150,24 @@ public class UserResource {
             throw new ForbiddenResourceException();
         }
 
-        Specification<BaseMonitor> spec = search == null ? null : SpecificationUtils.getSpecFromQuery(search, SpecificationUtils::mealAttributeConverter);
+//        //Specification<BaseMonitor> spec = search == null ? null : SpecificationUtils.getSpecFromQuery(search, SpecificationUtils::mealAttributeConverter);
+//        throwException_IfUserIdDoesntExist(userId);     // check if user with id exists
+//        User theUser = userRepository.findUserById(userId);
+//        if (!isAdmin && !principal.getName().equals(theUser.getUsername())) {
+//            throw new ForbiddenResourceException();
+//        }
+//        //Add the user to the specification.
+//        Specification<BaseMonitor> userSpec = new ApiSpecification<>(new SearchCriteria("user", theUser, "eq"));
+//        spec = spec == null ? userSpec : spec.and(userSpec);
+//        return monitorRepository.findAll(spec, pageable).getContent();
+
         throwException_IfUserIdDoesntExist(userId);     // check if user with id exists
         User theUser = userRepository.findUserById(userId);
         if (!isAdmin && !principal.getName().equals(theUser.getUsername())) {
             throw new ForbiddenResourceException();
         }
         //Add the user to the specification.
-        Specification<BaseMonitor> userSpec = new ApiSpecification<>(new SearchCriteria("user", theUser, "eq"));
-        spec = spec == null ? userSpec : spec.and(userSpec);
-        return monitorRepository.findAll(spec, pageable).getContent();
+        return theUser.getMonitors();
     }
 
     @GetMapping("/{user_id}/{monitor_id}")

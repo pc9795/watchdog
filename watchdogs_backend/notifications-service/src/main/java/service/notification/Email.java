@@ -21,5 +21,10 @@ public class Email extends MimeMessage {
         this.setSubject(subject);
         this.setText(message);
         this.setSentDate(new Date());
+        this.saveChanges();
+    }
+
+    public void SetSession(Session theSession){
+        this.session = theSession;          // Will be used for orphaned emails
     }
 }

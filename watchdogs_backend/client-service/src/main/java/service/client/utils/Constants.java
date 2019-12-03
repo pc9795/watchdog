@@ -15,10 +15,12 @@ public final class Constants {
     public class ErrorMsg {
         public static final String RESOURCE_NOT_FOUND = "Resource not found";
         public static final String USER_ALREADY_EXISTS = "User with this username already exists";
+        public static final String USER_DOESNT_EXIST = "User doesnt exist with this username";
         public static final String BAD_CREDENTIALS = "Bad Credentials";
         public static final String UNAUTHORIZED = "Unauthorized";
         public static final String FORBIDDEN_RESOURCE = "Forbidden Resource";
         public static final String INTERNAL_SERVER_ERROR = "Something bad happened";
+        public static final String INCORRECT_PASSWORD = "Incorrect Password";
     }
 
     public class ApiV1Resource {

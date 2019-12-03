@@ -34,8 +34,10 @@ public class Notification {
 
 
 
-    private static String UserName = "thereallife.watchdog@gmail.com";
-    private static String Password = "watchdogPas";
+    private static String UserName = "thereallife.watchdog@gmail.com";      // TODO:DISTRIBUTE
+    private static String Password = "watchdogPas";                         // TODO:DISTRIBUTE
+
+    private static Session theSession;
 
 
 
@@ -65,6 +67,16 @@ public class Notification {
         */
         SetUpSystemPropertiesForEmail();
         Email.setUpEmailSenderAddress(UserName);
+
+        theSession = Session.getDefaultInstance(System_EmailProperties, new Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(UserName, Password);
+            }
+        });
+
+        sendEmailNotification("ferdiafagan@gmail.com", "test subject", "hello, this is a test message");
+        sendEmailNotification("ferdiafagan@outlook.com", "test subject", "hello, this is a test message");
+        sendEmailNotification("ferdia.fagan@ucdconnect.ie", "test subject", "hello, this is a test message");
     }
 
     private static final void SetUpSystemPropertiesForEmail(){
@@ -86,13 +98,10 @@ public class Notification {
     }
 
     public static void sendEmailNotification(String to, String subject, String message){
-        Session session = Session.getDefaultInstance(System_EmailProperties, new Authenticator() {
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(UserName, Password);
-            }
-        });
+        // this session will be managed better by an actor
+        // this can be distributed to
         try {
-            Email emailNotification = new Email(session, to, subject, message);
+            Email emailNotification = new Email(theSession, to, subject, message);
             Transport.send(emailNotification);
         } catch (MessagingException e) {
             e.printStackTrace();

@@ -1,5 +1,6 @@
 package service.client.repositories;
 
+import org.springframework.stereotype.Repository;
 import service.client.entities.User;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * Created On: 22-11-2019 00:44
  * Purpose: TODO:
  **/
+@Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
     @Bean

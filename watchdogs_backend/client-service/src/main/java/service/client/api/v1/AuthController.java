@@ -46,17 +46,13 @@ public class AuthController {
     @ResponseStatus(HttpStatus.CREATED)
     public User register(@RequestParam String username, @RequestParam String password)
             throws UserAlreadyExistException {
-        System.out.println("gots here 1");
 
         if (userRepository.findUserByUsername(username) != null) {
-            System.out.println("gots here 353: " + username);
             throw new UserAlreadyExistException();
         }
-        System.out.println("gots here 2");
 
         User user = new User(username.trim(), password.trim());
         user.setRoles(Collections.singletonList(new UserRole(UserRole.UserRoleType.REGULAR)));
-        System.out.println("gots here 3");
 
         //Check for any violations in constraints.
         Set<ConstraintViolation<User>> violations = validator.validate(user);
@@ -66,7 +62,6 @@ public class AuthController {
                             map(violation -> violation.getPropertyPath().toString() + " " + violation.getMessage()).
                             collect(Collectors.toList()), ","));
         }
-        System.out.println("gots here 4");
 
         //Encoding after checking validation
         user.setPassword(passwordEncoder.encode(password));
@@ -78,17 +73,12 @@ public class AuthController {
             throws ServletException, UsernamePasswordIncorrect {
         User user = userRepository.findUserByUsername(username);
         if (user == null) {
-            System.out.println("user doesnt exist");
             throw new BadCredentialsException(Constants.ErrorMsg.BAD_CREDENTIALS);
         }
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            System.out.println("passwords dont match : " + password + "  " + user.getPassword());
             throw new UsernamePasswordIncorrect();
         }
-        System.out.println("passwords match : " +user.getId() + "   " + user.getUsername() + "  " + user.getPassword() + "   " + (user.getRoles().get(0)).getType());
         request.login(username, password);
-        System.out.println("The user has succesfully logged in + " + user.getUsername() + "   " + user.getPassword());
-        System.out.println("f");
         return user;
     }
 }

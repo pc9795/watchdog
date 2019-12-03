@@ -90,9 +90,27 @@ public class User {
 
     @JsonIgnore
     public void setMonitors(List<BaseMonitor> monitors) {
-        this.monitors = monitors;
+        this.monitors = (List<BaseMonitor>)monitors;
         this.monitors.forEach(monitor -> monitor.setUser(this));
     }
+
+//    @JsonIgnore
+//    public void setMonitors(List<HttpMonitor> monitors) {
+//        this.monitors = monitors;
+//        this.monitors.forEach(monitor -> monitor.setUser(this));
+//    }
+//
+//    @JsonIgnore
+//    public void setMonitors(List<BaseMonitor> monitors) {
+//        this.monitors = monitors;
+//        this.monitors.forEach(monitor -> monitor.setUser(this));
+//    }
+//
+//    @JsonIgnore
+//    public void setMonitors(List<BaseMonitor> monitors) {
+//        this.monitors = monitors;
+//        this.monitors.forEach(monitor -> monitor.setUser(this));
+//    }
 
 
     public void addMonitor(BaseMonitor monitor) {

@@ -87,15 +87,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                     "    ]\n" +
                     "}";
 
-            adminPayload = "{\n" +
-                    "    \"username\": \"test1234\",\n" +
-                    "    \"password\": \"test1234\",\n" +
-                    "    \"roles\": [\n" +
-                    "        {\n" +
-                    "            \"type\": \"ADMIN\"\n" +
-                    "        }\n" +
-                    "    ]\n" +
-                    "}";
 
             testLoad = "{\n" +
                     "    \"username\": \"test1234\",\n" +

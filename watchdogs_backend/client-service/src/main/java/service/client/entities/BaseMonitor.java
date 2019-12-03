@@ -37,6 +37,15 @@ public class BaseMonitor {
     @JoinColumn(name = "user_id")
     private User user;
 
+    public BaseMonitor(){}
+
+    public BaseMonitor(String name, String ipOrUrlOrHost, @Positive int monitoringInterval) {
+        this.name = name;
+        this.ipOrUrlOrHost = ipOrUrlOrHost;
+        this.monitoringInterval = monitoringInterval;
+        this.user = user;
+    }
+
     public long getId() {
         return id;
     }

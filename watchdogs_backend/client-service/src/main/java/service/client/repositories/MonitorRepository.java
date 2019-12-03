@@ -28,22 +28,10 @@ public interface MonitorRepository extends JpaRepository<BaseMonitor, Long>, Jpa
     @Bean
     boolean existsBaseMonitorById(long id);
 
-//    @Query("SELECT * FROM base_monitors where user_id = ?0")
-//    List<BaseMonitor> findBaseMonitorsByUserId(long userId);
+
 
     List<BaseMonitor> findAll();
 
-//    @Query("SELECT * from base_monitor m where m.user.id=:userId")
-//    BaseMonitor getMonitorBelongingToId(@Param("userId") long userId);
 
-//    @Bean
-//    public boolean existsByUser(Long id);
-
-
-//    @Bean
-//    public boolean existsByUserIdAndId(@Param("user_id") long userId, @Param("id")long id);
-
-//    @Bean
-//    public boolean existsBaseMonitorByUserAndId(@PathParam("user_id") long user, @PathParam("id")long id);
 
 }

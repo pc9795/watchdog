@@ -18,6 +18,13 @@ public class HttpMonitor extends BaseMonitor {
     @Positive
     private int expectedHttpStatusCode;
 
+    public HttpMonitor(){}
+
+    public HttpMonitor(String name, String ipOrUrlOrHost, @Positive int monitoringInterval, @Positive int expectedHttpStatusCode) {
+        super(name,ipOrUrlOrHost , monitoringInterval);
+        this.expectedHttpStatusCode = expectedHttpStatusCode;
+    }
+
     public int getExpectedHttpStatusCode() {
         return expectedHttpStatusCode;
     }

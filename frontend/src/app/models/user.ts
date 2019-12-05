@@ -1,0 +1,7 @@
+/**
+ * Class to represent user information
+ */
+export class User {
+  constructor(public id: number, public username: string, public email: string, public password: string) {
+  }
+}

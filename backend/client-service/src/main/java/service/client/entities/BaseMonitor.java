@@ -2,6 +2,8 @@ package service.client.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import service.client.utils.Constants;
 
 import javax.persistence.*;
@@ -15,7 +17,13 @@ import javax.validation.constraints.Positive;
  **/
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "monitor_type")
+@DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.INTEGER)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = HttpMonitor.class),
+        @JsonSubTypes.Type(value = PingMonitor.class),
+        @JsonSubTypes.Type(value = SocketMonitor.class)
+})
 public class BaseMonitor {
 
     @Id
@@ -35,7 +43,7 @@ public class BaseMonitor {
     private int monitoringInterval;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 

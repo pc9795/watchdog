@@ -42,12 +42,18 @@ public class User implements UserDetails {
     @Email
     private String email;
 
+    @JsonIgnore
     //BaseMonitor is weak entity so enabling orphan removal
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BaseMonitor> monitors = new ArrayList<>();
 
     public User() {
 
+    }
+
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
     }
 
     @JsonProperty
@@ -101,6 +107,7 @@ public class User implements UserDetails {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         // Common role for all users.

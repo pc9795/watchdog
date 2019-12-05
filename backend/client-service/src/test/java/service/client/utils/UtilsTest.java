@@ -1,24 +1,17 @@
 package service.client.utils;
 
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.Test;
 
 class UtilsTest {
 
     @Test
-    void createErrorJSON() {
+    void testCreateErrorJSON() {
+        //todo implement
     }
 
     @Test
-    void createJSONErrorResponse() {
+    void testCreateJSONErrorResponse() {
+        //todo implement
     }
 
-    @Test
-    void joinCollection() {
-    }
-
-    @Test
-    void isPrincipalAdmin() {
-    }
 }

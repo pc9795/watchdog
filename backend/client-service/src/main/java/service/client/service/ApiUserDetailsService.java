@@ -31,6 +31,6 @@ public class ApiUserDetailsService implements UserDetailsService {
         if (user == null) {
             throw new UsernameNotFoundException(username);
         }
-        return new ApiUserPrincipal(user);
+        return user;
     }
 }

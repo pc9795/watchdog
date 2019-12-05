@@ -33,7 +33,7 @@ public class UserResource {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public User addUser(@Valid @RequestBody User user) throws UserAlreadyExistException {
-        if (userRepository.findUserByUsername(user.getUsername()) == null) {
+        if (userRepository.findUserByUsername(user.getUsername()) != null) {
             throw new UserAlreadyExistException(String.format(Constants.ErrorMsg.USER_ALREADY_EXIST,
                     user.getUsername()));
         }

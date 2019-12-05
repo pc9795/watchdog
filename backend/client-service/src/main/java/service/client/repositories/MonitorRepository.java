@@ -2,6 +2,9 @@ package service.client.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import service.client.entities.BaseMonitor;
+import service.client.entities.User;
+
+import java.util.List;
 
 /**
  * Created By: Prashant Chaubey
@@ -11,4 +14,5 @@ import service.client.entities.BaseMonitor;
 public interface MonitorRepository extends JpaRepository<BaseMonitor, Long> {
     BaseMonitor findById(long id);
 
+    List<BaseMonitor> findAllByUser(User user);
 }

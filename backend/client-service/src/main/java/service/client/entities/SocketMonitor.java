@@ -1,6 +1,5 @@
 package service.client.entities;
 
-import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.validation.constraints.Positive;
@@ -11,10 +10,9 @@ import javax.validation.constraints.Positive;
  * Purpose: Monitor for socket addresses
  **/
 @Entity
-@DiscriminatorValue("socket_monitor")
+@DiscriminatorValue("3")
 public class SocketMonitor extends BaseMonitor {
 
-    @Column(nullable = false)
     @Positive
     private Integer socketPort;
 

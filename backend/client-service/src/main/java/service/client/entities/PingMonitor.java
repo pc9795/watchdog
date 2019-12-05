@@ -9,6 +9,6 @@ import javax.persistence.Entity;
  * Purpose: Monitoring by ping
  **/
 @Entity
-@DiscriminatorValue("ping_monitor")
+@DiscriminatorValue("2")
 public class PingMonitor extends BaseMonitor {
 }

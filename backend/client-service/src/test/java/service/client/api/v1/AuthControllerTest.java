@@ -18,29 +18,16 @@ import service.client.repositories.UserRepository;
 import service.client.service.ApiUserDetailsService;
 import service.client.utils.Constants;
 
-
 import javax.sql.DataSource;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static net.bytebuddy.matcher.ElementMatchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.formLogin;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(AuthController.class)
 @ContextConfiguration
 @WebAppConfiguration
-//@TestPropertySource(locations="classpath:test.properties")
 public class AuthControllerTest {
         @MockBean
         protected DataSource dataSource;
@@ -55,13 +42,7 @@ public class AuthControllerTest {
     private UserRepository userRepository;
 
     @MockBean
-    private ApiUserPrincipal apiUserPrincipal;
-
-    @MockBean
     private ApiUserDetailsService apiUserDetailsService;
-
-    @MockBean
-    private RestAuthenticationEntryPoint authenticationEntryPoint;
 
     @Autowired
     private WebApplicationContext context;
@@ -70,10 +51,9 @@ public class AuthControllerTest {
 
 
     @Test
-    public void test_Register_Successfull() throws Exception {
+    public void testRegisterSuccessfull() throws Exception {
         BDDMockito.given(userRepository.findUserByUsername("existingUser")).
                 willReturn(null);
-
         BDDMockito.when(passwordEncoder.encode("password")).
                 then((invocationOnMock) -> invocationOnMock.getArgument(0));
         BDDMockito.when(userRepository.save(Mockito.any(User.class))).
@@ -87,12 +67,8 @@ public class AuthControllerTest {
     }
 
     @Test
-    public void test_Register_UserExists() throws Exception {
+    public void testRegisterUserExists() throws Exception {
         User theUser = new User("existingUser", "password");
-        List<UserRole> theListOfUsersRoles = new ArrayList<UserRole>();
-        theListOfUsersRoles.add(new UserRole(UserRole.UserRoleType.REGULAR));
-        theUser.setRoles(theListOfUsersRoles);
-
         BDDMockito.given(userRepository.findUserByUsername("existingUser")).
                 willReturn(theUser);
 
@@ -104,7 +80,7 @@ public class AuthControllerTest {
     }
 
     @Test
-    public void test_Register_ConstraintViolationForParameters() throws Exception {
+    public void testRegisterConstraintViolationForParameters() throws Exception {
         BDDMockito.given(userRepository.findUserByUsername("admin")).
                 willReturn(null);
         BDDMockito.when(passwordEncoder.encode("admin")).
@@ -117,7 +93,7 @@ public class AuthControllerTest {
     }
 
     @Test
-    public void test_Login_UsernameNotFound() throws Exception {
+    public void testLoginUsernameNotFound() throws Exception {
         BDDMockito.given(userRepository.findUserByUsername("admin")).
                 willReturn(null);
         mvc.perform(post("/login")
@@ -127,7 +103,7 @@ public class AuthControllerTest {
     }
 
     @Test
-    public void test_Login_IncorrectPassword() throws Exception {
+    public void testLoginIncorrectPassword() throws Exception {
         BDDMockito.given(userRepository.findUserByUsername("ferdia")).
                 willReturn(new User("ferdia", "password"));
         //Simulating the case where encoded password is different.

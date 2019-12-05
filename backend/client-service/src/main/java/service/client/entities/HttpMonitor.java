@@ -14,22 +14,22 @@ import javax.validation.constraints.Positive;
 public class HttpMonitor extends BaseMonitor {
 
     @Positive
-    private Integer expectedHttpStatusCode;
+    private Integer expectedStatusCode;
 
     public HttpMonitor() {
     }
 
     public HttpMonitor(String name, String ipOrUrlOrHost, int monitoringInterval, int expectedHttpStatusCode) {
         super(name, ipOrUrlOrHost, monitoringInterval);
-        this.expectedHttpStatusCode = expectedHttpStatusCode;
+        this.expectedStatusCode = expectedHttpStatusCode;
     }
 
-    public int getExpectedHttpStatusCode() {
-        return expectedHttpStatusCode;
+    public int getExpectedStatusCode() {
+        return expectedStatusCode;
     }
 
-    public void setExpectedHttpStatusCode(int expectedHttpStatusCode) {
-        this.expectedHttpStatusCode = expectedHttpStatusCode;
+    public void setExpectedStatusCode(int expectedStatusCode) {
+        this.expectedStatusCode = expectedStatusCode;
     }
 
 }

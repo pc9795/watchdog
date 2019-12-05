@@ -65,7 +65,7 @@ public class MonitorResource {
                     Constants.MINIMUM_MONITORING_INTERVAL));
         }
         User user = userRepository.findUserByUsername(principal.getName());
-        user.addMonitor(monitor);
+        monitor.setUser(user);
         //Save
         return monitorRepository.save(monitor);
     }
@@ -92,11 +92,11 @@ public class MonitorResource {
                     getTypeName(), monitor.getClass().getTypeName()));
         }
         dbMonitor.setName(monitor.getName());
-        dbMonitor.setIpOrUrlOrHost(monitor.getIpOrUrlOrHost());
+        dbMonitor.setIpOrHost(monitor.getIpOrHost());
         dbMonitor.setMonitoringInterval(monitor.getMonitoringInterval());
         //Updating polymorphic fields
         if (monitor instanceof HttpMonitor) {
-            ((HttpMonitor) dbMonitor).setExpectedHttpStatusCode(((HttpMonitor) monitor).getExpectedHttpStatusCode());
+            ((HttpMonitor) dbMonitor).setExpectedStatusCode(((HttpMonitor) monitor).getExpectedStatusCode());
         } else if (monitor instanceof SocketMonitor) {
             ((SocketMonitor) dbMonitor).setSocketPort(((SocketMonitor) monitor).getSocketPort());
         }

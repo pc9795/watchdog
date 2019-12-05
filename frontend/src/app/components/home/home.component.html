@@ -1,3 +1,46 @@
-<p>
-  home works!
-</p>
+<div class="container">
+  <div class="row mt-5">
+    <div class="col-3">
+      <a type="button" title="Add Monitor" class="btn btn-sm btn-secondary" routerLink="/createMonitor">
+        <i class="fa fa-plus"></i>
+      </a>
+    </div>
+  </div>
+
+  <table class="table table-hover table-sm mt-2">
+    <caption>Active monitors</caption>
+    <thead>
+    <tr>
+      <th scope="col">Name</th>
+      <th scope="col">Type</th>
+      <th scope="col">IP or Host</th>
+      <th scope="col">Monitoring interval</th>
+      <th scope="col">Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let monitor of monitors">
+      <td scope="row">
+        <a routerLink="/viewMonitor"
+           [state]="{monitor:monitor}">
+          {{monitor.name}}</a>
+      </td>
+      <td>{{monitor.type}}</td>
+      <td>
+        <p>{{monitor.ipOrHost}}</p>
+        <p class="shared-text" *ngIf="isHTTPMonitor(monitor)">Expected status : {{monitor.expectedStatusCode}}</p>
+        <p class="shared-text" *ngIf="isSocketMonitor(monitor)">Port: {{monitor.socketPort}}</p>
+      </td>
+      <td>
+        <p>{{monitoringIntervalInSecToMonitoringIntervalInText(monitor.monitoringInterval)}}</p>
+      </td>
+      <td>
+        <button title="Delete" class="btn btn-sm btn-outline-danger mr-1"
+                (click)="deleteMonitor(monitor.id)">
+          <i class="fa fa-trash"></i>
+        </button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>

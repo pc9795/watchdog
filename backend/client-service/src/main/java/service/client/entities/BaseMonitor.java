@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import service.client.utils.Constants;
+import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -32,27 +32,28 @@ public class BaseMonitor {
 
     @Column(nullable = false)
     @NotNull
+    @Length(min = 5, max = 50)
     private String name;
 
     @Column(nullable = false)
     @NotNull
-    private String ipOrUrlOrHost;
+    private String ipOrHost;
 
     @Positive
     @Column(nullable = false, columnDefinition = "int default 300")
     private int monitoringInterval;
 
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
     public BaseMonitor() {
     }
 
-    public BaseMonitor(String name, String ipOrUrlOrHost, int monitoringInterval) {
+    public BaseMonitor(String name, String ipOrHost, int monitoringInterval) {
         this.name = name;
-        this.ipOrUrlOrHost = ipOrUrlOrHost;
+        this.ipOrHost = ipOrHost;
         this.monitoringInterval = monitoringInterval;
     }
 
@@ -74,12 +75,12 @@ public class BaseMonitor {
         this.name = name;
     }
 
-    public String getIpOrUrlOrHost() {
-        return ipOrUrlOrHost;
+    public String getIpOrHost() {
+        return ipOrHost;
     }
 
-    public void setIpOrUrlOrHost(String ipOrUrl) {
-        this.ipOrUrlOrHost = ipOrUrl;
+    public void setIpOrHost(String ipOrUrl) {
+        this.ipOrHost = ipOrUrl;
     }
 
     public int getMonitoringInterval() {
@@ -103,7 +104,7 @@ public class BaseMonitor {
         return "BaseMonitor{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", ipOrUrlOrHost='" + ipOrUrlOrHost + '\'' +
+                ", ipOrHost='" + ipOrHost + '\'' +
                 ", monitoringInterval=" + monitoringInterval +
                 ", user=" + user +
                 '}';

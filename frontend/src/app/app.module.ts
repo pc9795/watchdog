@@ -11,6 +11,7 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 import {routing} from './app.routing';
 import {ErrorInterceptor} from './error.interceptor';
+import { AlertComponent } from './components/alert/alert.component';
 
 @NgModule({
   declarations: [
@@ -19,7 +20,8 @@ import {ErrorInterceptor} from './error.interceptor';
     RegisterComponent,
     HomeComponent,
     AddMonitorComponent,
-    ViewMonitorComponent
+    ViewMonitorComponent,
+    AlertComponent
   ],
   imports: [
     BrowserModule,

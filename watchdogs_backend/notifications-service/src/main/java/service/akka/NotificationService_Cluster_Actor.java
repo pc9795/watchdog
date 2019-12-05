@@ -1,5 +1,6 @@
 package service.akka;
 
+import akka.cluster.ClusterEvent;
 import service.akka.AkkaMessages.ClusterRelatedMessages.EmailNotificationRequest;
 import service.akka.AkkaMessages.ClusterRelatedMessages.JobFailed;
 
@@ -7,34 +8,32 @@ import service.akka.AkkaMessages.ClusterRelatedMessages.JobFailed;
 //import static service.akka.AkkaMessages.ClusterRelatedMessages.TransformationJob;
 //import static service.akka.AkkaMessages.ClusterRelatedMessages.TransformationResult;
 
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import java.util.concurrent.ThreadLocalRandom;
-
+import java.time.Duration;
 import akka.actor.ActorSelection;
 import akka.actor.Address;
+import akka.actor.Cancellable;
 import akka.actor.AbstractActor;
 import akka.cluster.Cluster;
-import akka.cluster.ClusterEvent;
 import akka.cluster.ClusterEvent.UnreachableMember;
 import akka.cluster.ClusterEvent.ReachableMember;
 import akka.cluster.ClusterEvent.CurrentClusterState;
 import akka.cluster.ClusterEvent.MemberEvent;
 import akka.cluster.ClusterEvent.MemberUp;
+import akka.cluster.ClusterEvent.ReachabilityEvent;
 import akka.cluster.Member;
 import akka.cluster.MemberStatus;
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
 
 public class NotificationService_Cluster_Actor extends AbstractActor {
 
     final String notificationServicePath;
     final Set<Address> notificationServices_Nodes = new HashSet<Address>();
 
-    LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
     Cluster cluster = Cluster.get(getContext().getSystem());
 
     public NotificationService_Cluster_Actor(String notificationServicePath) {
@@ -44,7 +43,7 @@ public class NotificationService_Cluster_Actor extends AbstractActor {
     // subscribe to cluster changes, MemberUp
     @Override
     public void preStart() {
-        cluster.subscribe(getSelf(), MemberUp.class, ClusterEvent.ReachabilityEvent.class);
+        cluster.subscribe(getSelf(), MemberUp.class, ReachabilityEvent.class);
 
 
     }
@@ -70,7 +69,9 @@ public class NotificationService_Cluster_Actor extends AbstractActor {
                             ActorSelection service = getContext().actorSelection(address + notificationServicePath);
                             service.forward(notificationServicePath, getContext());
                         })
+
                 .match(JobFailed.class, System.out::println)
+
                 .match(
                         CurrentClusterState.class,
                         state -> {

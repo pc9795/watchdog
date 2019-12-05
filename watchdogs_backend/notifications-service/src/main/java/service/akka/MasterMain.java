@@ -11,11 +11,11 @@ import akka.cluster.singleton.ClusterSingletonManagerSettings;
 import akka.cluster.singleton.ClusterSingletonProxy;
 import akka.cluster.singleton.ClusterSingletonProxySettings;
 
-public class StatsSampleOneMasterMain {
+public class MasterMain {
 
     public static void main(String[] args) {
         if (args.length == 0) {
-            startup(new String[] {"2551", "2552", "0"});
+            startup(new String[] {"2551"});
             NotificationServiceClusterMaster.main(new String[0]);
         } else {
             startup(args);

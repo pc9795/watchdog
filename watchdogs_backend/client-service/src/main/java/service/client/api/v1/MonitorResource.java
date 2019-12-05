@@ -35,6 +35,7 @@ public class MonitorResource {
     }
 
 
+
     @GetMapping("/getAll")
     public List<BaseMonitor> getAllMonitors() {
         return monitorRepository.findAll();

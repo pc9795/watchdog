@@ -5,6 +5,7 @@ package service.akka;
 
 import akka.actor.*;
 import akka.japi.Procedure;
+import akka.japi.pf.DeciderBuilder;
 import akka.pattern.BackoffOpts;
 import akka.pattern.BackoffSupervisor;
 import akka.persistence.*;
@@ -14,15 +15,16 @@ import akka.persistence.snapshot.japi.*;
 import akka.routing.RoundRobinPool;
 import static akka.pattern.Patterns.ask;
 
+import akka.japi.pf.DeciderBuilder;
+import akka.actor.SupervisorStrategy;
+
 
 // Email imports
 import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.time.Duration;
+import java.util.*;
 
 // IMPORT THE MESSAGES:
 import service.akka.AkkaMessages.ClusterRelatedMessages.Confirm;
@@ -89,13 +91,6 @@ public class EmailDelivery_Supervisor extends AbstractPersistentActorWithAtLeast
                         notificationService_Supervisor));
     }
 
-
-//    public EmailDelivery_Supervisor(int numberOf_Construction_Workers, int numberOf_Delivery_Workers,
-//                                       ActorRef notificationService_Supervisor,
-//                                    String userName, String password, String Email_port) {
-//        this.UserName = userName;
-//        this.Password = password;
-//        this.EMAIL_PORT = Email_port;
     public EmailDelivery_Supervisor(int numberOf_Construction_Workers, int numberOf_Delivery_Workers,
                                 ActorRef notificationService_Supervisor) {
 
@@ -112,8 +107,10 @@ public class EmailDelivery_Supervisor extends AbstractPersistentActorWithAtLeast
             this.getContext().watch(theCreatedConstructor);
         }
 
-        this.emailDeliveryRouter = this.getContext().actorOf(new RoundRobinPool(numberOf_Delivery_Workers)
+        this.emailDeliveryRouter = this.getContext().system().actorOf(new RoundRobinPool(numberOf_Delivery_Workers)
                         .props(EmailDelivery_Worker.props(emailProperties)), "emailDeliveryWorkers");
+
+        context().watch(this.emailDeliveryRouter);
 
         constructorsCurrentlyCollectingFrom = new HashSet<Integer>();
 
@@ -131,12 +128,25 @@ public class EmailDelivery_Supervisor extends AbstractPersistentActorWithAtLeast
         emailProperties.put(MAIL_DEBUG_PROPERTY, "true");
         emailProperties.put(MAIL_STOREPROTOCOL_PROPERTY, MAIL_PROTOCOL);
         emailProperties.put(MAIL_TRANSPORTPROTOCOL_PROPERTY, SMTP);
-//        theEmailSession = Session.getDefaultInstance(System_EmailProperties, new Authenticator() {
-//            protected PasswordAuthentication getPasswordAuthentication() {
-//                return new PasswordAuthentication(UserName, Password);
-//            }
-//        });
     }
+
+    // supervision stratagy strategy
+    private static SupervisorStrategy strategy =
+            new OneForOneStrategy(
+                    10,
+                    Duration.ofMinutes(1),
+                    DeciderBuilder
+                            .match(ArithmeticException.class, e -> SupervisorStrategy.resume())
+                            .match(NullPointerException.class, e -> SupervisorStrategy.restart())
+                            .match(IllegalArgumentException.class, e -> SupervisorStrategy.stop())
+                            .matchAny(o -> SupervisorStrategy.escalate())
+                            .build());
+
+    @Override
+    public SupervisorStrategy supervisorStrategy() {
+        return strategy;
+    }
+
 
     @Override
     public void preStart() {
@@ -165,6 +175,11 @@ public class EmailDelivery_Supervisor extends AbstractPersistentActorWithAtLeast
         return receiveBuilder().match(Object.class, evt -> updateState(evt)).build();
 
        // return null;        // TODO:
+    }
+
+    @Override
+    public void preRestart(Throwable cause, Optional<Object> msg) {
+        // do not kill all children, which is the default here
     }
 
 

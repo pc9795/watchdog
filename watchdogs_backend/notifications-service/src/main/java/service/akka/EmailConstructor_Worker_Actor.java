@@ -15,6 +15,12 @@ import javax.mail.Session;
 
 import static akka.pattern.Patterns.ask;
 
+import akka.actor.InternalActorRef;
+import akka.actor.Kill;
+import akka.actor.PoisonPill;
+import akka.actor.StopChild;
+import akka.japi.Procedure;
+
 // MESSAGE IMPORTS
 import service.akka.AkkaMessages.ClusterRelatedMessages.EmailNotificationRequest;
 import service.akka.AkkaMessages.ClusterRelatedMessages.ConstructionWorker_JobNotice;
@@ -30,11 +36,12 @@ import service.akka.AkkaMessages.NotificationConstructionMessages.CollectConstru
 import service.akka.AkkaMessages.NotificationConstructionMessages.CollectedConstructersEmails_Confirmation;
 import service.notification.Email_Entity;
 
+// Import others:
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
-
+import java.util.Optional;
 
 // This will be incharge of making the email from the template
 public class EmailConstructor_Worker_Actor extends AbstractActor {
@@ -88,13 +95,24 @@ public class EmailConstructor_Worker_Actor extends AbstractActor {
         System.out.println("the path is " + this.getContext().system().name());
         System.out.println("Email Construcotr has been made");
         System.out.println("Email Construcotr path : " + this.getContext().getSelf().path());
+        super.preStart();
+    }
 
+    @Override
+    public void postStop() {
+        System.out.println("Stopped");
     }
 
     @Override
     public Receive createReceive() {
         return receiveBuilder()
                 .match(DistributedPubSubMediator.SubscribeAck.class, msg -> System.out.println("Have subscribed"))
+
+                .match(
+                        Exception.class,
+                        exception -> {
+                            throw exception;
+                        })
 
                 .match(ConstructionWorker_JobNotice.class, this::jobOffer)
                 .match(EmailConstructionJobOffer.class, this::makeTheEmail)
@@ -103,6 +121,17 @@ public class EmailConstructor_Worker_Actor extends AbstractActor {
                 .match(CollectConstructersEmails_Request.class, this::collectTheEmails)
 
                 .build();
+    }
+
+    @Override
+    public void preRestart(Throwable reason, Optional<Object> message) throws Exception {
+        System.out.println(self().path().name() + " is about to restart");
+        super.preRestart(reason, message);
+    }
+
+    @Override
+    public void postRestart(Throwable reason) {
+        System.out.println(self().path().name() + " has restarted");
     }
 
     private void jobOffer(ConstructionWorker_JobNotice jobOfferRecieved){

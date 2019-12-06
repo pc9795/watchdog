@@ -14,6 +14,7 @@ import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
@@ -55,6 +56,28 @@ public class EmailDelivery_Worker extends AbstractActor {
                 () -> new EmailDelivery_Worker(theProperties));
     }
 
+    @Override
+    public void preStart() throws Exception {
+        System.out.println(self().path().name() + " is starting");
+        super.preStart();
+    }
+
+    @Override
+    public void postStop() {
+        System.out.println("Stopped");
+    }
+
+    @Override
+    public void preRestart(Throwable reason, Optional<Object> message) throws Exception {
+        System.out.println(self().path().name() + " is about to restart");
+        super.preRestart(reason, message);
+    }
+
+    @Override
+    public void postRestart(Throwable reason) {
+        System.out.println(self().path().name() + " has restarted");
+    }
+
 
     public EmailDelivery_Worker(Properties theProperties) throws NoSuchProviderException {
         this.theProperties = theProperties;
@@ -74,6 +97,12 @@ public class EmailDelivery_Worker extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder()
+                .match(
+                        Exception.class,
+                        exception -> {
+                            throw exception;
+                        })
+
                 .match(EmailToNowBeDelivered_Request.class, this::GoOnDelivery)
 
                 .build();

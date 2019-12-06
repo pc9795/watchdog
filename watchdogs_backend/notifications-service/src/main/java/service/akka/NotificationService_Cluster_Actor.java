@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import java.util.concurrent.ThreadLocalRandom;
 import java.time.Duration;
 import akka.actor.ActorSelection;
@@ -29,6 +30,8 @@ import akka.cluster.ClusterEvent.ReachabilityEvent;
 import akka.cluster.Member;
 import akka.cluster.MemberStatus;
 
+import akka.io.Tcp;
+
 public class NotificationService_Cluster_Actor extends AbstractActor {
 
     final String notificationServicePath;
@@ -43,9 +46,8 @@ public class NotificationService_Cluster_Actor extends AbstractActor {
     // subscribe to cluster changes, MemberUp
     @Override
     public void preStart() {
-        cluster.subscribe(getSelf(), MemberUp.class, ReachabilityEvent.class);
-
-
+        cluster.subscribe(getSelf(),
+                MemberEvent.class, ReachabilityEvent.class);
     }
 
     // re-subscribe when restart

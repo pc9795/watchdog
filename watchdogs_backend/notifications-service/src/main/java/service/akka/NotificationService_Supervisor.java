@@ -1,8 +1,9 @@
 package service.akka;
 
+// Actor imports
 import akka.actor.*;
 import akka.cluster.pubsub.DistributedPubSubMediator;
-import com.typesafe.config.ConfigFactory;
+//import com.typesafe.config.ConfigFactory;
 
 import akka.cluster.pubsub.DistributedPubSub;
 //import akka.japi.Procedure;
@@ -14,7 +15,28 @@ import akka.persistence.*;
 import akka.persistence.journal.japi.*;
 import akka.persistence.snapshot.japi.*;
 
+// Cluster imports
+//import static service.akka.AkkaMessages.ClusterRelatedMessages.BACKEND_REGISTRATION;
+//import service.akka.AkkaMessages.ClusterRelatedMessages.EmailNotificationRequest;
+//import service.akka.AkkaMessages.ClusterRelatedMessages.JobFailed;
+//
+//import akka.cluster.Cluster;
+//import akka.cluster.ClusterEvent.CurrentClusterState;
+//import akka.cluster.ClusterEvent.MemberUp;
+//import akka.cluster.Member;
+//import akka.cluster.MemberStatus;
 
+import akka.cluster.routing.ClusterRouterGroup;
+import akka.cluster.routing.ClusterRouterGroupSettings;
+import akka.cluster.routing.ClusterRouterPool;
+import akka.cluster.routing.ClusterRouterPoolSettings;
+import akka.routing.ConsistentHashingGroup;
+import akka.routing.ConsistentHashingPool;
+import akka.actor.ActorRef;
+import akka.actor.Props;
+import akka.actor.AbstractActor;
+import akka.routing.ConsistentHashingRouter.ConsistentHashableEnvelope;
+import akka.routing.FromConfig;
 
 // import email requirements
 
@@ -33,8 +55,12 @@ import service.akka.AkkaMessages.NotificationConstructionMessages.ConstructionWo
 import service.akka.AkkaMessages.NotificationConstructionMessages.EmailConstructionJobOffer;
 import service.akka.AkkaMessages.ClusterRelatedMessages.Confirm;
 
+import akka.io.Tcp;
+
 
 public class NotificationService_Supervisor extends AbstractPersistentActorWithAtLeastOnceDelivery  {
+
+//    Cluster cluster = Cluster.get(getContext().getSystem());
 
     // message caches:
 //    Map<Integer, Long> jobIdMatcher = new HashMap<Integer, Long>();     // element -> (Job id for notification service, job id for the cluster)
@@ -45,7 +71,7 @@ public class NotificationService_Supervisor extends AbstractPersistentActorWithA
     private Stack constructionWorkers_LookingForJob = new Stack();
 
     // Activate Subscription Offer
-    ActorRef pubsubchannel;
+//    ActorRef pubsubchannel;
 
     // Delivery Supervisor
     ArrayList<ActorRef> deliverySupervisorPaths = new ArrayList<ActorRef>();
@@ -57,12 +83,12 @@ public class NotificationService_Supervisor extends AbstractPersistentActorWithA
     }
 
     public NotificationService_Supervisor(int amountOfDeliverySupervisors){
-        for(int i = 0; i < amountOfDeliverySupervisors;i++){
-            deliverySupervisorPaths.add(this.getContext().system()
-                    .actorOf(EmailDelivery_Supervisor.props(
-                            1,1,
-                            context().self()), ("deliverySupervisor" + i)));
-        }
+//        for(int i = 0; i < amountOfDeliverySupervisors;i++){
+//            deliverySupervisorPaths.add(this.getContext().system()
+//                    .actorOf(EmailDelivery_Supervisor.props(
+//                            1,1,
+//                            context().self()), ("deliverySupervisor" + i)));
+//        }
 
         System.out.println("finnished making : notificationService_Supervisor node");
 
@@ -76,7 +102,9 @@ public class NotificationService_Supervisor extends AbstractPersistentActorWithA
 
     @Override
     public void preStart() {
-        this.pubsubchannel =  DistributedPubSub.get(getContext().system()).mediator();
+//        cluster.subscribe(getSelf(), MemberUp.class);
+
+//        this.pubsubchannel =  DistributedPubSub.get(getContext().system()).mediator();
 
         System.out.println("notification service supervisor has been succesfully created");
         System.out.println("Notification service supervisor path : " + this.getContext().getSelf().path());
@@ -85,6 +113,12 @@ public class NotificationService_Supervisor extends AbstractPersistentActorWithA
     }
 
 
+    // re-subscribe when restart
+//    @Override
+//    public void postStop() {
+//        cluster.unsubscribe(getSelf());
+//    }
+
     @Override
     public Receive createReceive()
     {
@@ -92,8 +126,30 @@ public class NotificationService_Supervisor extends AbstractPersistentActorWithA
                 .match(EmailNotificationRequest.class, this::publishToConstructionWorkers)
                 .match(ConstructionWorker_WorkRequest.class, this::sendTheJobToConstructor)
                 .match(Confirm.class, this::confirmHaveSuccessfullySentWorkToContructor)
+
+//                .match(
+//                        CurrentClusterState.class,
+//                        state -> {
+//                            for (Member member : state.getMembers()) {
+//                                if (member.status().equals(MemberStatus.up())) {
+//                                    register(member);
+//                                }
+//                            }
+//                        })
+//                .match(
+//                        MemberUp.class,
+//                        mUp -> {
+//                            register(mUp.member());
+//                        })
         .build();
     }
+
+//    void register(Member member) {
+//        if (member.hasRole("notificationService"))
+//            getContext()
+//                    .actorSelection(member.address() + "/user/notificationService")
+//                    .tell(BACKEND_REGISTRATION, getSelf());
+//    }
 
 
     @Override
@@ -129,7 +185,7 @@ public class NotificationService_Supervisor extends AbstractPersistentActorWithA
 //        currentJobId++;
         System.out.println("Advertising the job");
         emailNotificcationRequest_Reserve_ToBeProscessed.push(theEmailToSend);
-        pubsubchannel.tell(new DistributedPubSubMediator.Publish("notificationConstructor_list", new ConstructionWorker_JobNotice()), getSelf());
+//        pubsubchannel.tell(new DistributedPubSubMediator.Publish("notificationConstructor_list", new ConstructionWorker_JobNotice()), getSelf());
     }
 
     /**

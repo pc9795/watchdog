@@ -19,6 +19,22 @@ public class MonitorLog {
     private String errorMessage;
     private LocalDateTime creationTime;
 
+    //For Spring data
+    public MonitorLog() {
+    }
+
+    public MonitorLog(boolean status) {
+        this.status = status;
+        this.errorMessage = "";
+        this.creationTime = LocalDateTime.now();
+    }
+
+    public MonitorLog(boolean status, String errorMessage) {
+        this.status = status;
+        this.errorMessage = errorMessage;
+        this.creationTime = LocalDateTime.now();
+    }
+
     public String getId() {
         return id;
     }
@@ -65,5 +81,21 @@ public class MonitorLog {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public boolean isWorking() {
+        return !this.errorMessage.isEmpty();
+    }
+
+    @Override
+    public String toString() {
+        return "MonitorLog{" +
+                "id='" + id + '\'' +
+                ", monitorId=" + monitorId +
+                ", username='" + username + '\'' +
+                ", status=" + status +
+                ", errorMessage='" + errorMessage + '\'' +
+                ", creationTime=" + creationTime +
+                '}';
     }
 }

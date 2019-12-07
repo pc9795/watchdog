@@ -44,7 +44,7 @@ public class BaseMonitor {
     private int monitoringInterval;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 

@@ -1,5 +1,6 @@
 package service.client.repositories;
 
+import core.repostiories.cockroachdb.UserRepository;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -8,8 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
-import service.client.entities.HttpMonitor;
-import service.client.entities.User;
+import core.entities.cockroachdb.HttpMonitor;
+import core.entities.cockroachdb.User;
 
 import java.util.Arrays;
 import java.util.Collections;

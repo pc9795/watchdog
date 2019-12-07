@@ -1,4 +1,4 @@
-package service.client.entities;
+package core.entities.cockroachdb;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;

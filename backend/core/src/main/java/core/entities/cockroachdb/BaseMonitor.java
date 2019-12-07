@@ -1,4 +1,4 @@
-package service.client.entities;
+package core.entities.cockroachdb;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;

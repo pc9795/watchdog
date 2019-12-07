@@ -13,8 +13,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
-import service.client.entities.User;
-import service.client.repositories.UserRepository;
+import core.entities.cockroachdb.User;
+import core.repostiories.cockroachdb.UserRepository;
+import service.client.controllers.AuthController;
 import service.client.service.ApiUserDetailsService;
 import service.client.utils.Constants;
 

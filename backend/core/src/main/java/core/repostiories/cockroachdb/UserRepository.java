@@ -1,8 +1,8 @@
-package service.client.repositories;
+package core.repostiories.cockroachdb;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import service.client.entities.User;
+import core.entities.cockroachdb.User;
 
 /**
  * Created By: Prashant Chaubey

@@ -1,8 +1,8 @@
-package service.client.repositories;
+package core.repostiories.cockroachdb;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import service.client.entities.BaseMonitor;
-import service.client.entities.User;
+import core.entities.cockroachdb.BaseMonitor;
+import core.entities.cockroachdb.User;
 
 import java.util.List;
 

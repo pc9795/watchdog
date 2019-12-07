@@ -1,45 +1,46 @@
-package service;
+package service.monitoring;
 
 import org.junit.Test;
+import service.monitoring.utils.Utils;
 
 import java.io.IOException;
 
-public class MonitorTest {
+public class UtilsTest {
 
 
     @Test
     public void monitorHttpMonitorCheckWithURLReturnsTrue() throws IOException {
-        assert Monitor.doHTTPMonitor("www.google.com/", 200);
+        assert !Utils.checkHttpStatus("www.google.com/", 200).isFaulty();
     }
 
     @Test
     public void monitorHttpMonitorCheckWithIPReturnsTrue() throws IOException {
-        assert Monitor.doHTTPMonitor("216.58.199.164", 200);
+        assert !Utils.checkHttpStatus("216.58.199.164", 200).isFaulty();
     }
 
     @Test
     public void monitorPingMonitorCheckWithIPReturnsTrue() throws IOException {
-        assert Monitor.doPingMonitor("127.0.0.1");
+        assert !Utils.doPing("127.0.0.1", 3000).isFaulty();
     }
 
     @Test
     public void monitorPingMonitorCheckWithHostReturnsTrue() throws IOException {
-        assert Monitor.doPingMonitor("stackoverflow.com");
+        assert !Utils.doPing("stackoverflow.com", 3000).isFaulty();
     }
 
     @Test
     public void monitorPortMonitorCheckWithHostReturnsTrue() {
-        assert Monitor.doPortMonitor("stackoverflow.com", 80);
+        assert !Utils.checkPortWorking("stackoverflow.com", 80).isFaulty();
     }
 
     @Test
     public void monitorPortMonitorCheckWithIpReturnsTrue() {
-        assert Monitor.doPortMonitor("127.0.0.1", 80);
+        assert !Utils.checkPortWorking("127.0.0.1", 80).isFaulty();
     }
 
     @Test
     public void monitorPortMonitorCheckWithURLReturnsTrue() {
-        assert Monitor.doPortMonitor("www.google.com/", 80);
+        assert !Utils.checkPortWorking("www.google.com/", 80).isFaulty();
     }
 
 }

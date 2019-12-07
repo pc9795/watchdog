@@ -1,6 +1,8 @@
-package service.client.api.v1;
+package service.client.controllers;
 
 
+import core.entities.cockroachdb.User;
+import core.repostiories.cockroachdb.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -9,8 +11,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import service.client.beans.UserLogin;
-import service.client.entities.User;
-import service.client.repositories.UserRepository;
 import service.client.utils.Constants;
 import service.client.utils.Utils;
 

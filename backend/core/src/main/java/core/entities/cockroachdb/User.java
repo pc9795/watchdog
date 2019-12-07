@@ -1,4 +1,4 @@
-package service.client.entities;
+package core.entities.cockroachdb;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -42,7 +42,6 @@ public class User implements UserDetails {
     @Email
     private String email;
 
-    @JsonIgnore
     //BaseMonitor is weak entity so enabling orphan removal
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BaseMonitor> monitors = new ArrayList<>();
@@ -124,7 +123,7 @@ public class User implements UserDetails {
         this.password = password;
     }
 
-    @JsonProperty
+    @JsonIgnore
     public List<BaseMonitor> getMonitors() {
         return monitors;
     }

@@ -31,5 +31,6 @@ public final class Constants {
     }
 
     public static final int MINIMUM_MONITORING_INTERVAL = 300;
+    public static final int MAXIMUM_MONITORING_LOGS = 5;
     public static final String WATCHDOG_BASE_PACKAGE = "service.client.api.v1";
 }

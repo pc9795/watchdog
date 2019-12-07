@@ -4,10 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import service.client.entities.User;
+import core.entities.cockroachdb.User;
 import service.client.exceptions.ResourceNotFoundException;
 import service.client.exceptions.UserAlreadyExistException;
-import service.client.repositories.UserRepository;
+import core.repostiories.cockroachdb.UserRepository;
 import service.client.utils.Constants;
 
 import javax.validation.Valid;

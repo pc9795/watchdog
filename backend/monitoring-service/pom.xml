@@ -8,6 +8,13 @@
         <version>1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
+    <packaging>jar</packaging>
     <artifactId>monitoring-service</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>watchdog</groupId>
+            <artifactId>core</artifactId>
+            <version>1.0</version>
+        </dependency>
+    </dependencies>
 </project>

@@ -1,21 +1,27 @@
 package service.client.api.v1;
 
+import core.entities.cockroachdb.BaseMonitor;
+import core.entities.cockroachdb.HttpMonitor;
+import core.entities.cockroachdb.SocketMonitor;
+import core.entities.cockroachdb.User;
+import core.entities.mongodb.MonitorLog;
+import core.repostiories.cockroachdb.MonitorRepository;
+import core.repostiories.cockroachdb.UserRepository;
+import core.repostiories.mongodb.MonitorLogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import service.client.entities.BaseMonitor;
-import service.client.entities.HttpMonitor;
-import service.client.entities.SocketMonitor;
-import service.client.entities.User;
 import service.client.exceptions.BadDataException;
 import service.client.exceptions.ForbiddenResourceException;
 import service.client.exceptions.ResourceNotFoundException;
-import service.client.repositories.MonitorRepository;
-import service.client.repositories.UserRepository;
 import service.client.utils.Constants;
 
 import javax.validation.Valid;
 import java.security.Principal;
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -29,11 +35,14 @@ public class MonitorResource {
 
     private final MonitorRepository monitorRepository;
     private final UserRepository userRepository;
+    private final MonitorLogRepository monitorLogRepository;
 
     @Autowired
-    public MonitorResource(MonitorRepository monitorRepository, UserRepository userRepository) {
+    public MonitorResource(MonitorRepository monitorRepository, UserRepository userRepository,
+                           MonitorLogRepository monitorLogRepository) {
         this.monitorRepository = monitorRepository;
         this.userRepository = userRepository;
+        this.monitorLogRepository = monitorLogRepository;
     }
 
 
@@ -46,15 +55,7 @@ public class MonitorResource {
     @GetMapping("/{monitor_id}")
     public BaseMonitor getMonitor(@PathVariable("monitor_id") long monitorId, Principal principal)
             throws ResourceNotFoundException, ForbiddenResourceException {
-        BaseMonitor monitor = monitorRepository.findById(monitorId);
-        if (monitor == null) {
-            throw new ResourceNotFoundException(String.format("Monitor id:%s", monitorId));
-        }
-        //Monitor is created by user
-        if (!monitor.getUser().getUsername().equals(principal.getName())) {
-            throw new ForbiddenResourceException();
-        }
-        return monitor;
+        return getUsersMonitor(monitorId, principal.getName());
     }
 
     @PostMapping
@@ -78,14 +79,7 @@ public class MonitorResource {
             throw new BadDataException(String.format("Minimum interval allowed:%s sec",
                     Constants.MINIMUM_MONITORING_INTERVAL));
         }
-        BaseMonitor dbMonitor = monitorRepository.findById(monitorId);
-        if (dbMonitor == null) {
-            throw new ResourceNotFoundException(String.format("Monitor id:%s", monitorId));
-        }
-        //Monitor is created by user
-        if (!dbMonitor.getUser().getUsername().equals(principal.getName())) {
-            throw new ForbiddenResourceException();
-        }
+        BaseMonitor dbMonitor = getUsersMonitor(monitorId, principal.getName());
         //Different types
         if (!dbMonitor.getClass().equals(monitor.getClass())) {
             throw new BadDataException(String.format("Expected:  %s, got data of type: %s", dbMonitor.getClass().
@@ -106,15 +100,35 @@ public class MonitorResource {
     @DeleteMapping("/{monitor_id}")
     public void deleteAUsersMonitor(@PathVariable("monitor_id") long monitorId, Principal principal)
             throws ResourceNotFoundException, ForbiddenResourceException {
-        BaseMonitor dbMonitor = monitorRepository.findById(monitorId);
-        if (dbMonitor == null) {
-            throw new ResourceNotFoundException(String.format("Monitor id:%s", monitorId));
-        }
-        //Check event is created by current user
-        if (!dbMonitor.getUser().getUsername().equals(principal.getName())) {
-            throw new ForbiddenResourceException();
-        }
+        BaseMonitor dbMonitor = getUsersMonitor(monitorId, principal.getName());
         //Delete
         monitorRepository.delete(dbMonitor);
+    }
+
+    @GetMapping("/{monitor_id}/status")
+    public MonitorLog getMonitorStatus(@PathVariable("monitor_id") long monitorId, Principal principal) {
+        return monitorLogRepository.findTopByMonitorIdAndUsernameOrderByCreationTimeDesc(monitorId,
+                principal.getName());
+    }
+
+    @GetMapping("/{monitor_id}/logs")
+    public List<MonitorLog> getMonitorLogs(@PathVariable("monitor_id") long monitorId, Principal principal) {
+        Pageable pageable = PageRequest.of(0, Constants.MAXIMUM_MONITORING_LOGS);
+        return monitorLogRepository.findByMonitorIdAndUsernameOrderByCreationTimeDesc(pageable, monitorId,
+                principal.getName());
+    }
+
+    //Helper method
+    private BaseMonitor getUsersMonitor(long monitorId, String username) throws ResourceNotFoundException,
+            ForbiddenResourceException {
+        BaseMonitor monitor = monitorRepository.findById(monitorId);
+        if (monitor == null) {
+            throw new ResourceNotFoundException(String.format("Monitor id:%s", monitorId));
+        }
+        //Monitor is created by user
+        if (!monitor.getUser().getUsername().equals(username)) {
+            throw new ForbiddenResourceException();
+        }
+        return monitor;
     }
 }

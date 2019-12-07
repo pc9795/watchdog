@@ -20,8 +20,6 @@ import service.client.utils.Constants;
 
 import javax.validation.Valid;
 import java.security.Principal;
-import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 
 /**

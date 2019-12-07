@@ -1,11 +1,11 @@
 <div class="container">
   <div class="row mt-5">
-    <div class="col-6 offset-3">
-      <h3 class="text-secondary text-center text-capitalize">Monitor details</h3>
+    <div class="col-6">
+      <h3 class="text-secondary text-capitalize">Monitor details</h3>
     </div>
   </div>
   <div class="row mt-3">
-    <form class="col-4 offset-4" (ngSubmit)="onSubmit()" [formGroup]="viewMonitorForm">
+    <form class="col-4" (ngSubmit)="onSubmit()" [formGroup]="viewMonitorForm">
 
       <select class="form-control" formControlName="type" #monitorType>
         <option value="" selected>Choose Monitor...</option>
@@ -49,5 +49,25 @@
 
       <button [disabled]="loading" class="btn btn-info form-control mt-2">Save<i class="ml-1 fa fa-save"></i></button>
     </form>
+    <div class="col-4">
+      <table class="table table-hover table-sm">
+        <thead>
+        <tr>
+          <th scope="col">Status</th>
+          <th scope="col">Error Message</th>
+          <th scope="col">Creation time</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let monitorLog of monitorLogs">
+          <td scope="row" *ngIf="monitorLog.status"><i style="color:green" class="fa fa-check"></i></td>
+          <td scope="row" *ngIf="!monitorLog.status"><i style="color:red" class="fa fa-close"></i></td>
+          <td>{{monitorLog.errorMessage}}</td>
+          <td>{{monitorLog.creationTime}}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
+
 </div>

@@ -4,6 +4,13 @@ import {MonitorsService} from '../../services/monitors.service';
 import {HttpErrorResponse} from '@angular/common/http';
 import {AlertService} from '../../services/alert.service';
 import {Router} from '@angular/router';
+import {MonitorLog} from '../../models/monitor-log';
+
+enum MonitorStatus {
+  WARMING,
+  WORKING,
+  NOT_WORKING
+}
 
 /**
  * Component carrying the monitors
@@ -16,11 +23,23 @@ import {Router} from '@angular/router';
 export class HomeComponent implements OnInit {
 
   monitors: Monitor[];
+  monitorStatus = new Map();
 
   constructor(private monitorService: MonitorsService, private alertService: AlertService, private router: Router) {
     // Get monitors.
     this.monitorService.getMonitors().subscribe(data => {
       this.monitors = data as Monitor[];
+      this.monitors.map(obj => this.monitorStatus.set(obj.id, MonitorStatus.WARMING));
+      this.monitors.forEach(
+        obj => {
+          this.monitorService.getMonitorStatus(obj.id).subscribe(
+            data2 => {
+              this.monitorStatus.set((data2 as MonitorLog).monitorId,
+                (data2 as MonitorLog).status ? MonitorStatus.WORKING : MonitorStatus.NOT_WORKING);
+            }, error2 => this.alertService.error(error2)
+          );
+        }
+      );
     }, (error: HttpErrorResponse) => {
       this.alertService.error(error);
     });
@@ -37,6 +56,15 @@ export class HomeComponent implements OnInit {
     return monitor.type === MonitorType.SOCKET_MONITOR;
   }
 
+  getStatus(monitorId: number) {
+    this.monitorService.getMonitorStatus(monitorId).subscribe(
+      data2 => {
+        this.monitorStatus.set((data2 as MonitorLog).monitorId,
+          (data2 as MonitorLog).status ? MonitorStatus.WORKING : MonitorStatus.NOT_WORKING);
+      }, error2 => this.alertService.error(error2)
+    );
+  }
+
   // Refresh hack
   refresh() {
     this.router.navigateByUrl('/createMonitor', {skipLocationChange: true}).then(
@@ -44,6 +72,18 @@ export class HomeComponent implements OnInit {
         this.router.navigate(['/']);
       }
     );
+  }
+
+  getMonitorStatus(monitorId: number): string {
+    switch (this.monitorStatus.get(monitorId)) {
+      case MonitorStatus.WARMING:
+        return '<i class="fa fa-spin fa-spinner"></i>';
+      case MonitorStatus.WORKING:
+        return '<i class="fa fa-check green"></i>';
+      case MonitorStatus.NOT_WORKING:
+        return '<i class="fa fa-close red"></i>';
+    }
+    return '';
   }
 
   monitoringIntervalInSecToMonitoringIntervalInText(seconds: number | string) {

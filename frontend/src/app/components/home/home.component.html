@@ -15,6 +15,7 @@
       <th scope="col">Type</th>
       <th scope="col">IP or Host</th>
       <th scope="col">Monitoring interval</th>
+      <th scope="col">Status</th>
       <th scope="col">Actions</th>
     </tr>
     </thead>
@@ -34,10 +35,15 @@
       <td>
         <p>{{monitoringIntervalInSecToMonitoringIntervalInText(monitor.monitoringInterval)}}</p>
       </td>
+      <td><p [innerHTML]="getMonitorStatus(monitor.id)"></p></td>
       <td>
         <button title="Delete" class="btn btn-sm btn-outline-danger mr-1"
                 (click)="deleteMonitor(monitor.id)">
           <i class="fa fa-trash"></i>
+        </button>
+        <button title="Refresh" class="btn btn-sm btn-outline-secondary mr-1"
+                (click)="getStatus(monitor.id)">
+          <i class="fa fa-refresh"></i>
         </button>
       </td>
     </tr>

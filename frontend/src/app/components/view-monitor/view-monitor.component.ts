@@ -5,6 +5,7 @@ import {Router} from '@angular/router';
 import {MonitorsService} from '../../services/monitors.service';
 import {AlertService} from '../../services/alert.service';
 import {HttpErrorResponse} from '@angular/common/http';
+import {MonitorLog} from '../../models/monitor-log';
 
 @Component({
   selector: 'app-view-monitor',
@@ -18,6 +19,7 @@ export class ViewMonitorComponent implements OnInit {
   submitted = false;
   loading = false;
   monitorTypes: string[];
+  monitorLogs: MonitorLog[];
 
   constructor(private router: Router, private formBuilder: FormBuilder, private monitorService: MonitorsService,
               private alertService: AlertService) {
@@ -25,6 +27,12 @@ export class ViewMonitorComponent implements OnInit {
     const state = this.router.getCurrentNavigation().extras.state;
     if (state) {
       this.monitor = state.monitor;
+      // Get monitor logs.
+      this.monitorService.getMonitorLogs(this.monitor.id).subscribe(data => {
+        this.monitorLogs = data as MonitorLog[];
+      }, (error: HttpErrorResponse) => {
+        this.alertService.error(error);
+      });
     }
     this.monitorTypes = Object.keys(MonitorType).map(obj => MonitorType[obj]);
   }

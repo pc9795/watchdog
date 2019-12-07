@@ -18,10 +18,6 @@ export class MonitorsService {
     return this.httpClient.get(`${environment.server}api/v1/monitors`, {withCredentials: true});
   }
 
-  getMonitor(monitorId: number) {
-    return this.httpClient.get(`${environment.server}api/v1/monitors/${monitorId}`, {withCredentials: true});
-  }
-
   createMonitor(monitor: Monitor) {
     return this.httpClient.post(`${environment.server}api/v1/monitors`, monitor, {withCredentials: true});
   }
@@ -32,5 +28,13 @@ export class MonitorsService {
 
   deleteEvent(monitorId: number) {
     return this.httpClient.delete(`${environment.server}api/v1/monitors/${monitorId}`, {withCredentials: true});
+  }
+
+  getMonitorStatus(monitorId: number) {
+    return this.httpClient.get(`${environment.server}api/v1/monitors/${monitorId}/status`, {withCredentials: true});
+  }
+
+  getMonitorLogs(monitorId: number) {
+    return this.httpClient.get(`${environment.server}api/v1/monitors/${monitorId}/logs`, {withCredentials: true});
   }
 }

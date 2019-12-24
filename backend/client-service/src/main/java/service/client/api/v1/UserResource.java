@@ -30,6 +30,13 @@ public class UserResource {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * Create a user
+     *
+     * @param user user to be created
+     * @return created user
+     * @throws UserAlreadyExistException if user with given username already exist in database.
+     */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public User addUser(@Valid @RequestBody User user) throws UserAlreadyExistException {
@@ -42,6 +49,13 @@ public class UserResource {
         return this.userRepository.save(user);
     }
 
+    /**
+     * Get a user with given id.
+     *
+     * @param userId db id of the user
+     * @return user with the given id
+     * @throws ResourceNotFoundException if user with given id doesn't exist in database.
+     */
     @GetMapping("/{user_id}")
     public User getUserById(@PathVariable("user_id") long userId) throws ResourceNotFoundException {
         User user = userRepository.findById(userId);

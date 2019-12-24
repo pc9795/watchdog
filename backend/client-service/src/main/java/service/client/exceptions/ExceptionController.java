@@ -19,14 +19,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 
+/**
+ * For custom implementation of common errors.
+ */
 @ControllerAdvice
 public class ExceptionController {
 
     /**
      * Handle resource not found exception
      *
-     * @param response
-     * @throws IOException
+     * @param response response object
+     * @throws IOException if not able to update the response object
      */
     @ExceptionHandler(ResourceNotFoundException.class)
     public void handleResourceNotFound(Exception e, HttpServletResponse response) throws IOException {
@@ -37,9 +40,9 @@ public class ExceptionController {
     /**
      * Handles exception raised by validation api.
      *
-     * @param exc
-     * @param response
-     * @throws IOException
+     * @param exc      exception object
+     * @param response response object
+     * @throws IOException if not able to update the response object
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public void handleMethodArgumentNotValidException(MethodArgumentNotValidException exc,
@@ -56,8 +59,8 @@ public class ExceptionController {
     /**
      * Handles exception for forbidden access of the resources
      *
-     * @param response
-     * @throws IOException
+     * @param response response object
+     * @throws IOException if not able to update the response object
      */
     @ExceptionHandler(ForbiddenResourceException.class)
     public void handleForbiddenResourceException(HttpServletResponse response) throws IOException {
@@ -67,8 +70,8 @@ public class ExceptionController {
     /**
      * Exception when given client request is not in expected format.
      *
-     * @param response
-     * @throws IOException
+     * @param response response object
+     * @throws IOException if not able to update the response object
      */
     @ExceptionHandler({HttpMessageNotReadableException.class, HttpMediaTypeNotSupportedException.class})
     public void handleInvalidClientRequests(HttpServletResponse response) throws IOException {
@@ -80,9 +83,9 @@ public class ExceptionController {
      * Exception when given client request is not in expected format. In this method we send more detailed response
      * in comparison to another method which handles invalid client requests
      *
-     * @param e
-     * @param response
-     * @throws IOException
+     * @param e        exception object
+     * @param response response object
+     * @throws IOException if not able to update the response object
      */
     @ExceptionHandler({BadCredentialsException.class, BadDataException.class,
             MissingServletRequestParameterException.class, HttpRequestMethodNotSupportedException.class,
@@ -94,9 +97,9 @@ public class ExceptionController {
     /**
      * A catch all block.
      *
-     * @param e
-     * @param response
-     * @throws IOException
+     * @param e        exception object
+     * @param response response object
+     * @throws IOException if not able to update the response object
      */
     @ExceptionHandler(Exception.class)
     public void handleAll(Exception e, HttpServletResponse response) throws IOException {

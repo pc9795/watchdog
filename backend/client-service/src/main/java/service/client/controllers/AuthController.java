@@ -20,6 +20,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
 
+/**
+ * Controller for authentication
+ */
 @RestController
 public class AuthController {
 
@@ -32,17 +35,28 @@ public class AuthController {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * Create a session of a user with given credentials.
+     *
+     * @param request   request object
+     * @param userLogin user credentials
+     * @return the logged in user
+     * @throws ServletException if servlet API is not able to login user with the given credentials.
+     */
     @PostMapping("/login")
     public User login(HttpServletRequest request, @Valid @RequestBody UserLogin userLogin)
             throws ServletException {
+        //Check user exists in the database
         User user = userRepository.findUserByUsername(userLogin.getUsername());
         if (user == null) {
             throw new BadCredentialsException(String.format(Constants.ErrorMsg.USERNAME_NOT_FOUND,
                     userLogin.getUsername()));
         }
+        //Check passwords
         if (!passwordEncoder.matches(userLogin.getPassword(), user.getPassword())) {
             throw new BadCredentialsException(Constants.ErrorMsg.PASSWORDS_NOT_MATCH);
         }
+        //Create a session with the help of ServletAPI.
         request.login(userLogin.getUsername(), userLogin.getPassword());
         return user;
     }
@@ -50,8 +64,8 @@ public class AuthController {
     /**
      * Handles 404. There was not a clean way to handle it by a controller advice.
      *
-     * @param response
-     * @throws IOException
+     * @param response response object
+     * @throws IOException if not able to update the response object.
      */
     @GetMapping("/error")
     public void handle404(HttpServletResponse response) throws IOException {

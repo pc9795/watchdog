@@ -24,6 +24,7 @@ public final class Constants {
         public static final String USER_ALREADY_EXIST = "User with the username:%s already exists";
     }
 
+    //API urls
     public class ApiV1Resource {
         private static final String PREFIX = "/api/v1";
         public static final String USER = PREFIX + "/users";

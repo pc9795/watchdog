@@ -17,11 +17,11 @@ public final class Utils {
     /**
      * Create a standard JSON message with given error code and message.
      *
-     * @param errorCode
-     * @param errorMessage
-     * @return
+     * @param errorCode    error code
+     * @param errorMessage error message
+     * @return json string formatted with given error code and message.
      */
-    public static String createErrorJSON(int errorCode, String errorMessage) {
+    private static String createErrorJSON(int errorCode, String errorMessage) {
         ObjectNode errorNode = JsonNodeFactory.instance.objectNode();
         errorNode.put("code", errorCode);
         errorNode.put("message", errorMessage);
@@ -33,10 +33,10 @@ public final class Utils {
     /**
      * Utility method to create a JSON response for a particular error code and message.
      *
-     * @param errorCode
-     * @param errorMessage
-     * @param response
-     * @throws IOException
+     * @param errorCode    error code
+     * @param errorMessage error message
+     * @param response     response object
+     * @throws IOException if not able to update the response object
      */
     public static void createJSONErrorResponse(int errorCode, String errorMessage, HttpServletResponse response)
             throws IOException {

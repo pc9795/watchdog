@@ -20,8 +20,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  * Created On: 22-11-2019 00:32
  * Purpose: Entry point of the application
  **/
-@EnableWebSecurity
-@EnableSwagger2
+@EnableWebSecurity //Enable spring security
+@EnableSwagger2 //Enable swagger
 @SpringBootApplication
 @EntityScan(value = "core.entities.cockroachdb")
 @EnableJpaRepositories(basePackages = {"core.repostiories.cockroachdb"})
@@ -31,7 +31,7 @@ public class Main {
     /**
      * Main method
      *
-     * @param args
+     * @param args program arguments
      */
     public static void main(String[] args) {
         SpringApplication.run(Main.class, args);
@@ -40,7 +40,7 @@ public class Main {
     /**
      * For swagger configuration
      *
-     * @return
+     * @return configuration object
      */
     @Bean
     public Docket api() {

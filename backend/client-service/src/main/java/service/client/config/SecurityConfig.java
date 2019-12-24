@@ -33,6 +33,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final DataSource dataSource;
     private final ApiUserDetailsService service;
 
+    //Injected by spring
     @Value("${cors_url}")
     private String corsURL;
 
@@ -45,8 +46,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     /**
      * Enabling jdbc authentication.
      *
-     * @param auth
-     * @throws Exception
+     * @param auth configuration object
+     * @throws Exception if something goes wrong
      */
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
@@ -59,11 +60,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     /**
      * Configure http url access.
      *
-     * @param http
-     * @throws Exception
+     * @param http configuration object
+     * @throws Exception if something goes wrong
      */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        //Enable CORS and disable CSRF
         http.cors().and().csrf().disable()
                 .exceptionHandling().authenticationEntryPoint(
                 (httpServletRequest, httpServletResponse, e) ->
@@ -92,7 +94,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     /**
      * Password encoder to encode user passwords.
      *
-     * @return
+     * @return password encoder
      */
     @Bean
     public PasswordEncoder encoder() {
@@ -102,7 +104,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     /**
      * Configuration to enable CORS
      *
-     * @return
+     * @return cors configuration object
      */
     @Bean
     CorsConfigurationSource corsConfigurationSource() {

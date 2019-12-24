@@ -4,9 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import org.apache.catalina.core.Constants;
 import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 
@@ -40,7 +43,9 @@ public class BaseMonitor {
     private String ipOrHost;
 
     @Positive
-    @Column(nullable = false, columnDefinition = "int default 300")
+    @Column(nullable = false)
+    @Min(value = core.utils.Constants.MINIMUM_MONITORING_INTERVAL)
+    @Max(value = core.utils.Constants.MAXIMUM_MONITORING_INTERVAL)
     private int monitoringInterval;
 
     @JsonIgnore

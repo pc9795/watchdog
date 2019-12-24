@@ -44,45 +44,73 @@ public class MonitorResource {
     }
 
 
+    /**
+     * Get all the monitors for a user.
+     *
+     * @param principal logged in user
+     * @return list of monitors
+     */
     @GetMapping()
     public List<BaseMonitor> getAllMonitors(Principal principal) {
         User user = userRepository.findUserByUsername(principal.getName());
         return monitorRepository.findAllByUser(user);
     }
 
+    /**
+     * Get a particular monitor for a user.
+     *
+     * @param monitorId db id of the monitor
+     * @param principal logged in user
+     * @return monitor
+     * @throws ResourceNotFoundException  monitor with that id does not exist
+     * @throws ForbiddenResourceException request for a monitor not created by the logged in user.
+     */
     @GetMapping("/{monitor_id}")
     public BaseMonitor getMonitor(@PathVariable("monitor_id") long monitorId, Principal principal)
             throws ResourceNotFoundException, ForbiddenResourceException {
         return getUsersMonitor(monitorId, principal.getName());
     }
 
+    /**
+     * Create a monitor
+     *
+     * @param monitor   monitor object
+     * @param principal logged in user
+     * @return created monitor
+     */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BaseMonitor createMonitor(@Valid @RequestBody BaseMonitor monitor, Principal principal) throws BadDataException {
-        if (monitor.getMonitoringInterval() < Constants.MINIMUM_MONITORING_INTERVAL) {
-            throw new BadDataException(String.format("Minimum interval allowed:%s sec",
-                    Constants.MINIMUM_MONITORING_INTERVAL));
-        }
+    public BaseMonitor createMonitor(@Valid @RequestBody BaseMonitor monitor, Principal principal) {
         User user = userRepository.findUserByUsername(principal.getName());
+        //Maintaining foreign key constraint
         monitor.setUser(user);
         //Save
         return monitorRepository.save(monitor);
     }
 
+    /**
+     * Edit already saved monitor
+     *
+     * @param monitorId db id of the monitor
+     * @param monitor   new details for the monitor
+     * @param principal logged in user
+     * @return updated monitor
+     * @throws ResourceNotFoundException  monitor with given id doesn't exist
+     * @throws ForbiddenResourceException the monitor is not created by logged in user
+     * @throws BadDataException           you can't send different type of child monitor. ex - can't send HTTPMonitor to
+     *                                    edit a SocketMonitor object.
+     */
     @PutMapping("/{monitor_id}")
     public BaseMonitor updateMonitor(@PathVariable("monitor_id") long monitorId, @Valid @RequestBody BaseMonitor monitor,
                                      Principal principal) throws ResourceNotFoundException, ForbiddenResourceException,
             BadDataException {
-        if (monitor.getMonitoringInterval() < Constants.MINIMUM_MONITORING_INTERVAL) {
-            throw new BadDataException(String.format("Minimum interval allowed:%s sec",
-                    Constants.MINIMUM_MONITORING_INTERVAL));
-        }
         BaseMonitor dbMonitor = getUsersMonitor(monitorId, principal.getName());
         //Different types
         if (!dbMonitor.getClass().equals(monitor.getClass())) {
             throw new BadDataException(String.format("Expected:  %s, got data of type: %s", dbMonitor.getClass().
                     getTypeName(), monitor.getClass().getTypeName()));
         }
+        //Updating details
         dbMonitor.setName(monitor.getName());
         dbMonitor.setIpOrHost(monitor.getIpOrHost());
         dbMonitor.setMonitoringInterval(monitor.getMonitoringInterval());
@@ -92,9 +120,18 @@ public class MonitorResource {
         } else if (monitor instanceof SocketMonitor) {
             ((SocketMonitor) dbMonitor).setSocketPort(((SocketMonitor) monitor).getSocketPort());
         }
+        //Save
         return monitorRepository.save(dbMonitor);
     }
 
+    /**
+     * Delete the monitor with given id.
+     *
+     * @param monitorId db id of the monitor to be deleted
+     * @param principal logged in user
+     * @throws ResourceNotFoundException  When a monitor with given id doesn't exist in the database.
+     * @throws ForbiddenResourceException When the given monitor is not created by the logged in user.
+     */
     @DeleteMapping("/{monitor_id}")
     public void deleteAUsersMonitor(@PathVariable("monitor_id") long monitorId, Principal principal)
             throws ResourceNotFoundException, ForbiddenResourceException {
@@ -103,12 +140,26 @@ public class MonitorResource {
         monitorRepository.delete(dbMonitor);
     }
 
+    /**
+     * Get the status of the monitor. It will get the latest log related to the monitor.
+     *
+     * @param monitorId db id of the monitor.
+     * @param principal logged in user
+     * @return latest log entry of the monitor.
+     */
     @GetMapping("/{monitor_id}/status")
     public MonitorLog getMonitorStatus(@PathVariable("monitor_id") long monitorId, Principal principal) {
         return monitorLogRepository.findTopByMonitorIdAndUsernameOrderByCreationTimeDesc(monitorId,
                 principal.getName());
     }
 
+    /**
+     * Get a configured no of logs for the monitor
+     *
+     * @param monitorId db id of the monitor
+     * @param principal logged in user
+     * @return latest logs for the monitor.
+     */
     @GetMapping("/{monitor_id}/logs")
     public List<MonitorLog> getMonitorLogs(@PathVariable("monitor_id") long monitorId, Principal principal) {
         Pageable pageable = PageRequest.of(0, Constants.MAXIMUM_MONITORING_LOGS);
@@ -116,10 +167,19 @@ public class MonitorResource {
                 principal.getName());
     }
 
-    //Helper method
+    /**
+     * Utility method to extract a monitor when a user is logged in.
+     *
+     * @param monitorId db id of the monitor
+     * @param username  username of the user currently logged in.
+     * @return monitor object
+     * @throws ResourceNotFoundException  if monitor with given id doesn't exist in the database.
+     * @throws ForbiddenResourceException if monitor is not created by the user with the given username.
+     */
     private BaseMonitor getUsersMonitor(long monitorId, String username) throws ResourceNotFoundException,
             ForbiddenResourceException {
         BaseMonitor monitor = monitorRepository.findById(monitorId);
+        //Monitor doesn't exist.
         if (monitor == null) {
             throw new ResourceNotFoundException(String.format("Monitor id:%s", monitorId));
         }

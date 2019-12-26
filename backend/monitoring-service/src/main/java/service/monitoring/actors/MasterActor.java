@@ -20,18 +20,18 @@ import java.util.logging.Logger;
 /**
  * Created By: Prashant Chaubey
  * Created On: 06-12-2019 00:56
- * Purpose: TODO:
+ * Purpose: Master actor which will control child actors for work
  **/
 public class MasterActor extends AbstractActor {
-    private static Logger LOG = Logger.getLogger(MasterActor.class.toString());
-    private MonitorRepository monitorRepository;
-    private MonitorLogRepository monitorLogRepository;
-    private int pollingInterval;
-    private Map<Long, ActorRef> monitorToActor;
-    private int masterCount;
-    private int index;
-    private long lastRetrievedId;
-    private Pageable pageable;
+    private static Logger LOG = Logger.getLogger(MasterActor.class.toString()); //Logger object
+    private MonitorRepository monitorRepository;  //Access cockroachdb
+    private MonitorLogRepository monitorLogRepository; //Access mongodb
+    private int pollingInterval; //Interval at which master actor will check for work
+    private Map<Long, ActorRef> monitorToActor; //Mapping of monitor id to the child actor to which work is assigned
+    private int masterCount; //How many masters are working
+    private int index; //What is the no of this master
+    private long lastRetrievedId; //What was the last retrieved id
+    private Pageable pageable; //How many results to extract from the database at a time.
 
     public MasterActor(MonitorRepository monitorRepository, MonitorLogRepository monitorLogRepository,
                        int pollingInterval, int masterCount, int index, int workSize) {
@@ -45,6 +45,11 @@ public class MasterActor extends AbstractActor {
         this.pageable = PageRequest.of(0, workSize);
     }
 
+    /**
+     * Configuration of what behavior for what message.
+     *
+     * @return configuration object
+     */
     @Override
     public Receive createReceive() {
         return receiveBuilder().
@@ -55,35 +60,53 @@ public class MasterActor extends AbstractActor {
                 build();
     }
 
+    /**
+     * Check the cockroach db for work
+     */
     private void findWork() {
         LOG.info("Finding Work...");
         List<BaseMonitor> monitors = this.monitorRepository.findWorkForMaster(this.pageable, lastRetrievedId,
                 masterCount, index);
         LOG.info(String.format("Work found: %s", monitors.size()));
+        //Update the latest monitor id for next query
         if (monitors.size() != 0) {
             lastRetrievedId = monitors.get(monitors.size() - 1).getId();
         }
+        //Message to self to assign work
         getSelf().tell(new MonitoringProtocol.AssignWork(monitors), getSelf());
     }
 
+    /**
+     * Assign the extracted monitors to workers
+     *
+     * @param monitors list of monitors
+     */
     private void assignWork(List<BaseMonitor> monitors) {
         LOG.info("Assigning Work...");
         for (BaseMonitor monitor : monitors) {
+            //Create child actor
             ActorRef child = getContext().actorOf(Props.create(WorkerActor.class, getSelf(), monitor));
             this.monitorToActor.put(monitor.getId(), child);
+            //Tell it to start work
             child.tell(new MonitoringProtocol.StartWork(), getSelf());
         }
+        //Message to self to wait for some time
         getSelf().tell(new MonitoringProtocol.Wait(), getSelf());
     }
 
     private void waitForSomeTime() {
         LOG.info("Going to Wait...");
         ActorSystem system = getContext().system();
-        system.scheduler().scheduleOnce(Duration.ofSeconds(this.pollingInterval), () -> {
-            getSelf().tell(new MonitoringProtocol.FindWork(), getSelf());
-        }, system.dispatcher());
+        //Schedule a message to find work after a waiting time.
+        system.scheduler().scheduleOnce(Duration.ofSeconds(this.pollingInterval), () ->
+                getSelf().tell(new MonitoringProtocol.FindWork(), getSelf()), system.dispatcher());
     }
 
+    /**
+     * Handles child message to update log
+     *
+     * @param monitorLog monitor log object
+     */
     private void updateLog(MonitorLog monitorLog) {
         LOG.info(String.format("Updating Log...%s", monitorLog.toString()));
         monitorLogRepository.save(monitorLog);

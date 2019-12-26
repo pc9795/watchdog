@@ -27,12 +27,7 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-            <scope>test</scope>
-        </dependency>
+        <!--Java Mailing dependencies START-->
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>mail</artifactId>
@@ -43,6 +38,9 @@
             <artifactId>activation</artifactId>
             <version>1.1.1</version>
         </dependency>
+        <!--Java Mailing dependencies END-->
+
+        <!--AKKA dependencies START-->
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-actor_2.13</artifactId>
@@ -50,14 +48,46 @@
         </dependency>
         <dependency>
             <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-cluster_2.13</artifactId>
+            <artifactId>akka-cluster-tools_2.13</artifactId>
+            <version>2.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.lightbend.akka.management</groupId>
+            <artifactId>akka-management-cluster-http_2.13</artifactId>
+            <version>1.0.4</version>
+        </dependency>
+        <!--Had to add these dependencies as akka-management-cluster-http has these dependencies with downgraded version
+        and akka modules with different versions do not work together START-->
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-stream_2.13</artifactId>
             <version>2.6.0</version>
         </dependency>
         <dependency>
             <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-cluster-tools_2.13</artifactId>
+            <artifactId>akka-protobuf_2.13</artifactId>
             <version>2.6.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-cluster-sharding_2.13</artifactId>
+            <version>2.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-persistence_2.13</artifactId>
+            <version>2.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-distributed-data_2.13</artifactId>
+            <version>2.6.0</version>
+        </dependency>
+        <!--Had to add these dependencies as akka-management-cluster-http has these dependencies with downgraded version
+        and akka modules with different versions do not work together END-->
+        <!--AKKA dependencies START-->
+
+        <!--Spring Dependencies START-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -74,6 +104,9 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-mongodb</artifactId>
         </dependency>
+        <!--Spring Dependencies END-->
+
+        <!--Database drivers START-->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -83,6 +116,8 @@
             <artifactId>mongo-java-driver</artifactId>
             <version>3.11.2</version>
         </dependency>
+        <!--Database drivers END-->
+
         <!--Swagger START-->
         <dependency>
             <groupId>io.springfox</groupId>
@@ -95,23 +130,29 @@
             <version>2.8.0</version>
         </dependency>
         <!--Swagger END-->
-        <!--Testing Start-->
+
+        <!--Testing START-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!--Test database START-->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <version>1.4.194</version>
             <scope>test</scope>
         </dependency>
+        <!--Test database END-->
+
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
+
         <!--PowerMock START-->
         <dependency>
             <groupId>org.powermock</groupId>
@@ -126,7 +167,14 @@
             <scope>test</scope>
         </dependency>
         <!--PowerMock END-->
-        <!--Testing END-->
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <!--Testing START-->
     </dependencies>
 
     <build>

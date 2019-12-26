@@ -57,6 +57,7 @@ public class MasterActor extends AbstractActor {
                 match(MonitoringProtocol.AssignWork.class, (obj) -> assignWork(obj.getMonitors())).
                 match(MonitoringProtocol.Wait.class, (obj) -> waitForSomeTime()).
                 match(MonitoringProtocol.UpdateWork.class, (obj) -> updateLog(obj.getMonitorLog())).
+                match(MonitoringProtocol.DeleteWork.class, (obj) -> deleteWork()).
                 build();
     }
 
@@ -90,10 +91,13 @@ public class MasterActor extends AbstractActor {
             //Tell it to start work
             child.tell(new MonitoringProtocol.StartWork(), getSelf());
         }
-        //Message to self to wait for some time
-        getSelf().tell(new MonitoringProtocol.Wait(), getSelf());
+        //Message to self to check for deleted work
+        getSelf().tell(new MonitoringProtocol.DeleteWork(), getSelf());
     }
 
+    /**
+     * Wait for some time before looking for work
+     */
     private void waitForSomeTime() {
         LOG.info("Going to Wait...");
         ActorSystem system = getContext().system();
@@ -110,6 +114,24 @@ public class MasterActor extends AbstractActor {
     private void updateLog(MonitorLog monitorLog) {
         LOG.info(String.format("Updating Log...%s", monitorLog.toString()));
         monitorLogRepository.save(monitorLog);
+    }
+
+    /**
+     * Kill all children whose corresponding monitors are deleted.
+     */
+    private void deleteWork() {
+        List<BaseMonitor> monitorsToBeDeleted = monitorRepository.findByStatus(BaseMonitor.Status.TO_BE_STOPPED);
+        for (BaseMonitor monitor : monitorsToBeDeleted) {
+            //Check if the monitor is handled by this master.
+            if (monitorToActor.keySet().contains(monitor.getId())) {
+                getContext().stop(monitorToActor.get(monitor.getId()));
+            }
+            //We can choose to delete it straight-away but we are keeping it for the time-being.
+            monitor.setStatus(BaseMonitor.Status.STOPPED);
+            monitorRepository.save(monitor);
+        }
+        //Message to self to wait for some time
+        getSelf().tell(new MonitoringProtocol.Wait(), getSelf());
     }
 
 }

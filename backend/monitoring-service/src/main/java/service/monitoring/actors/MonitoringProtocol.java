@@ -50,15 +50,23 @@ public class MonitoringProtocol {
     /**
      * Message for master to update the monitoring log
      */
-    public static class UpdateWork {
+    static class UpdateWork {
         private MonitorLog monitorLog;
 
-        public UpdateWork(MonitorLog monitorLog) {
+        UpdateWork(MonitorLog monitorLog) {
             this.monitorLog = monitorLog;
         }
 
-        public MonitorLog getMonitorLog() {
+        MonitorLog getMonitorLog() {
             return monitorLog;
         }
     }
+
+    /**
+     * Message for parent to delete work for deleted monitors.
+     */
+    static class DeleteWork {
+
+    }
+
 }

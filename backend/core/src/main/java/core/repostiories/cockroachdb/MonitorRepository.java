@@ -1,9 +1,9 @@
 package core.repostiories.cockroachdb;
 
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
 import core.entities.cockroachdb.BaseMonitor;
 import core.entities.cockroachdb.User;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -25,15 +25,16 @@ public interface MonitorRepository extends JpaRepository<BaseMonitor, Long> {
     BaseMonitor findById(long id);
 
     /**
-     * Find a monitor for a user
+     * Find all monitors for a give user with give status
      *
-     * @param user user object
+     * @param user   user object
+     * @param status status of the monitor
      * @return list of monitors
      */
-    List<BaseMonitor> findAllByUser(User user);
+    List<BaseMonitor> findAllByUserAndStatus(User user, BaseMonitor.Status status);
 
     /**
-     * Find a list of monitors which are greater than a given id which are having a particular remainder with a given
+     * Find a list of active monitors which are greater than a given id which are having a particular remainder with a given
      * number. This method assumes that ids are creating in ascending order.
      *
      * @param pageable    object containing a page number and page size so that from all the results which page should be
@@ -43,8 +44,17 @@ public interface MonitorRepository extends JpaRepository<BaseMonitor, Long> {
      * @param masterIndex
      * @return
      */
-    @Query("select m from BaseMonitor m where m.id>:last_id and mod(m.id,:master_count)=:master_index order by m.id asc")
+    @Query("select m from BaseMonitor m where m.id>:last_id and mod(m.id,:master_count)=:master_index " +
+            "and m.status = 'ACTIVE' order by m.id asc")
     List<BaseMonitor> findWorkForMaster(Pageable pageable, @Param("last_id") long lastId,
                                         @Param("master_count") int masterCount,
                                         @Param("master_index") int masterIndex);
+
+    /**
+     * Find monitors with given status
+     *
+     * @param status status of the monitor
+     * @return list of monitors
+     */
+    List<BaseMonitor> findByStatus(BaseMonitor.Status status);
 }

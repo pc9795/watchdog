@@ -44,6 +44,7 @@ export class Utils {
    */
   static rangeToMonitoringIntervalInSec(valueStr: number) {
     const value = Number(valueStr);
+    console.log(value);
     // Value between 1-5 correspond to 10-50 secs.
     if (value <= 5) {
       return value * 10;
@@ -56,6 +57,9 @@ export class Utils {
     return (value - 123) * 60 * 60;
   }
 
+  /**
+   * Convert the value in seconds for a monitor to corresponding range value in scrollbar.
+   */
   static monitoringIntervalInSecToRange(secs: number) {
     // Value between 10-50 secs corresponds to 1-5.
     if (secs <= 50) {
@@ -68,6 +72,24 @@ export class Utils {
     }
     // Value between 2-24 hours corresponds to 124-147.
     return (minutes / 60) + 123;
+  }
+
+  /**
+   * Convert the value in seconds for a monitor to corresponding range to a textual representation.
+   */
+  static monitoringIntervalInSecToMonitoringIntervalInText(secs: number | string) {
+    secs = Number(secs);
+    // Value between 10-50 secs corresponds to 1-5.
+    if (secs <= 50) {
+      return `${secs} seconds`;
+    }
+    const minutes = secs / 60;
+    // Value between 1-119 minutes corresponds to 6-124.
+    if (minutes <= 119) {
+      return `${minutes} minutes`;
+    }
+    // Value between 2-24 hours corresponds to 124-147.
+    return `${minutes / 60} hours`;
   }
 
 }

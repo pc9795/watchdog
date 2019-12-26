@@ -25,6 +25,13 @@ export class ViewMonitorComponent implements OnInit {
   monitorTypes: string[]; // Monitor types
   monitorLogs: MonitorLog[]; // Monitor logs for the monitor
 
+  // To use utils in template we have to first save them in instance variables.
+  minRange = Utils.minRange;
+  maxRange = Utils.maxRange;
+  rangeToMonitoringIntervalInText = Utils.rangeToMonitoringIntervalInText;
+  isSocketMonitor = Utils.isSocketMonitor;
+  isHTTPMonitor = Utils.isHTTPMonitor;
+
   constructor(private router: Router, private formBuilder: FormBuilder, private monitorService: MonitorsService,
               private alertService: AlertService) {
 

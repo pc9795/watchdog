@@ -43,18 +43,18 @@
       </div>
 
       <div class="input-group mt-2">
-        <input id="monitoringInterval" type="range" class="custom-range" [min]="Utils.minRange" [max]="Utils.maxRange"
-               formControlName="monitoringInterval" #monitoringInterval [value]="Utils.minRange">
+        <input id="monitoringInterval" type="range" class="custom-range" [min]="minRange" [max]="maxRange"
+               formControlName="monitoringInterval" #monitoringInterval>
         <div class="input-group-append">
-          <span class="ml-1">{{Utils.rangeToMonitoringIntervalInText(monitoringInterval.value)}}</span>
+          <span class="ml-1">{{rangeToMonitoringIntervalInText(monitoringInterval.value)}}</span>
         </div>
       </div>
 
       <input type="number" class="form-control" placeholder="Expected Status code" formControlName="expectedStatusCode"
-             *ngIf="monitorType.type===HTTP_MONITOR">
+             *ngIf="isHTTPMonitor(monitorType.value)">
 
       <input type="number" placeholder="Socket Port" class="form-control" formControlName="socketPort"
-             *ngIf="monitorType.type===SOCKET_MONITOR">
+             *ngIf="isSocketMonitor(monitorType.value)">
 
       <button [disabled]="loading" class="btn btn-success form-control mt-2">Add<i class="ml-1 fa fa-plus"></i></button>
 

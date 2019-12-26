@@ -22,6 +22,13 @@ export class AddMonitorComponent implements OnInit {
   loading = false; // Signifies form is loading
   monitorTypes: string[]; // Types of monitor
 
+  // To use utils in template we have to first save them in instance variables.
+  minRange = Utils.minRange;
+  maxRange = Utils.maxRange;
+  rangeToMonitoringIntervalInText = Utils.rangeToMonitoringIntervalInText;
+  isSocketMonitor = Utils.isSocketMonitor;
+  isHTTPMonitor = Utils.isHTTPMonitor;
+
   constructor(private formBuilder: FormBuilder, private monitorService: MonitorsService, private router: Router,
               private alertService: AlertService) {
     this.monitorTypes = Object.keys(MonitorType).map(obj => MonitorType[obj]);
@@ -43,7 +50,7 @@ export class AddMonitorComponent implements OnInit {
       type: ['', Validators.required],
       name: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(50)]],
       ipOrHost: ['', [Validators.required]],
-      monitoringInterval: ['', []],
+      monitoringInterval: [Utils.minRange, []],
       expectedStatusCode: ['', []],
       socketPort: ['', []]
     });
@@ -58,7 +65,6 @@ export class AddMonitorComponent implements OnInit {
     // If form is invalid
     if (this.monitorForm.invalid) {
       Object.keys(this.monitorForm.controls).forEach(key => {
-
         const controlErrors = this.monitorForm.get(key).errors;
         if (controlErrors != null) {
           Object.keys(controlErrors).forEach(keyError => {
@@ -70,11 +76,11 @@ export class AddMonitorComponent implements OnInit {
     }
 
     this.loading = true;
+    console.log(this.monitorForm.get('monitoringInterval').value);
     // Get the monitor object from the form
     const monitor = new Monitor(-1, this.monitorForm.get('name').value, this.monitorForm.get('ipOrHost').value,
       Utils.rangeToMonitoringIntervalInSec(this.monitorForm.get('monitoringInterval').value), this.monitorForm.get('type').value,
       this.monitorForm.get('expectedStatusCode').value, this.monitorForm.get('socketPort').value);
-
     // Hits backend api to create monitor.
     this.monitorService.createMonitor(monitor).subscribe(
       // Success

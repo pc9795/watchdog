@@ -5,6 +5,7 @@ import {HttpErrorResponse} from '@angular/common/http';
 import {AlertService} from '../../services/alert.service';
 import {Router} from '@angular/router';
 import {MonitorLog} from '../../models/monitor-log';
+import {Utils} from '../../utils';
 
 enum MonitorStatus {
   WARMING,
@@ -24,6 +25,9 @@ export class HomeComponent implements OnInit {
 
   monitors: Monitor[]; // Monitors for the user
   monitorStatus = new Map(); // Map to store the status of each monitor
+
+  // To use utils in template we have to first save them in instance variables.
+  monitoringIntervalInSecToMonitoringIntervalInText = Utils.monitoringIntervalInSecToMonitoringIntervalInText;
 
   constructor(private monitorService: MonitorsService, private alertService: AlertService, private router: Router) {
     // Get monitors.
@@ -49,6 +53,10 @@ export class HomeComponent implements OnInit {
     this.monitorService.getMonitorStatus(monitorId).subscribe(
       // Success
       data2 => {
+        // When monitoring is not started and there is no log.
+        if (data2 == null) {
+          return;
+        }
         // Update status
         this.monitorStatus.set((data2 as MonitorLog).monitorId,
           (data2 as MonitorLog).status ? MonitorStatus.WORKING : MonitorStatus.NOT_WORKING);
@@ -83,18 +91,6 @@ export class HomeComponent implements OnInit {
         return '<i class="fa fa-close red"></i>';
     }
     return '';
-  }
-
-  /**
-   * Convert value in seconds to text.
-   */
-  monitoringIntervalInSecToMonitoringIntervalInText(seconds: number | string) {
-    seconds = Number(seconds);
-    const minutes = seconds / 60;
-    if (minutes <= 120) {
-      return `${minutes} mins`;
-    }
-    return `${minutes / 60} hours`;
   }
 
   /**

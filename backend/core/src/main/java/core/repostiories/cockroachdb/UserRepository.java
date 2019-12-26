@@ -12,10 +12,21 @@ import core.entities.cockroachdb.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
+    /**
+     * Find a user by given id
+     *
+     * @param id db id of the user
+     * @return user object
+     */
     User findById(long id);
 
+    /**
+     * Find a user by given username
+     *
+     * @param username username of the user
+     * @return user object
+     */
     User findUserByUsername(String username);
-
 
 
 }

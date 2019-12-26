@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import org.apache.catalina.core.Constants;
 import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
@@ -19,8 +18,10 @@ import javax.validation.constraints.Positive;
  * Purpose: Base class for monitors
  **/
 @Entity
+//Using a single table strategy for storing polymorphic objects.
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.INTEGER)
+//Enabling polymorphic rest resource
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = HttpMonitor.class),

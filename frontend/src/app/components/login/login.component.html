@@ -1,29 +1,38 @@
 <div class="container">
+
   <div class="row mt-5">
     <div class="col-6 offset-3">
       <h3 class="text-center text-secondary text-capitalize">Login to view monitors</h3>
     </div>
   </div>
+
   <div class="row mt-3">
+    <!--Login form-->
     <form class="col-4 offset-4" (ngSubmit)="onSubmit()" [formGroup]="loginForm">
 
       <input type="text" placeholder="Username" class="form-control mt-2" formControlName="username"
              [ngClass]="{ 'is-invalid': submitted && f.username.errors }" required>
+      <!--Error popup-->
       <div *ngIf="submitted && f.username.errors" class="invalid-feedback">
         <div *ngIf="f.username.errors.required">Username is required</div>
       </div>
 
       <input type="password" placeholder="Password" class="form-control mt-2" formControlName="password"
              [ngClass]="{ 'is-invalid': submitted && f.password.errors }" required>
+      <!--Error popup-->
       <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
         <div *ngIf="f.password.errors.required">Password is required</div>
       </div>
+
       <button [disabled]="loading" class="btn btn-success form-control mt-2">Login</button>
+
     </form>
   </div>
+
   <div class="row">
     <div class="col-4 offset-4">
       <a routerLink="/register">New user? Register Here!</a>
     </div>
   </div>
+
 </div>

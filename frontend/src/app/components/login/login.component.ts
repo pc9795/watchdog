@@ -16,23 +16,28 @@ import {HttpErrorResponse} from '@angular/common/http';
 })
 export class LoginComponent implements OnInit {
   loginForm: FormGroup; // Form object
-  submitted = false;
-  returnUrl: string;
-  loading = false;
+  submitted = false; // Signifies form is submitted
+  returnUrl: string; // url which was accessed while unauthorised; From this url the user was redirected to login page.
+  loading = false; // Signifies form is loading
 
   constructor(private formBuilder: FormBuilder, private authenticationService: AuthenticationService,
               private router: Router, private route: ActivatedRoute, private alertService: AlertService) {
-    // redirect to home if already logged in.
+    // Redirect to home if already logged in.
     if (this.authenticationService.currentUserValue) {
       this.router.navigate(['/']);
     }
   }
 
-  // getter for easy access to form fields
+  /**
+   * getter for easy access to form fields
+   */
   get f() {
     return this.loginForm.controls;
   }
 
+  /**
+   * Initialization hook
+   */
   ngOnInit() {
     // Initialize the form
     this.loginForm = this.formBuilder.group({
@@ -43,22 +48,29 @@ export class LoginComponent implements OnInit {
     this.returnUrl = this.route.snapshot.queryParams.returnUrl || '/';
   }
 
-  // Login
+  /**
+   * Action on submitting form
+   */
   onSubmit() {
     this.submitted = true;
+    // Invalid form
     if (this.loginForm.invalid) {
       return;
     }
+
     this.loading = true;
     this.authenticationService.login(this.f.username.value, this.f.password.value).pipe(first())
       .subscribe(
+        // Success
         data => {
           this.router.navigate([this.returnUrl]);
-        }, (error: HttpErrorResponse) => {
+        }, (
+          // Error
+          error: HttpErrorResponse) => {
           this.alertService.error(error);
           this.loading = false;
         });
+    this.loading = false;
+
   }
-
-
 }

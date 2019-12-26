@@ -17,6 +17,9 @@ export class AlertComponent implements OnInit, OnDestroy {
   constructor(private alertService: AlertService) {
   }
 
+  /**
+   * Initialization hook
+   */
   ngOnInit() {
     this.subscription = this.alertService.getMessage().subscribe(
       message => {
@@ -25,6 +28,9 @@ export class AlertComponent implements OnInit, OnDestroy {
     );
   }
 
+  /**
+   * Delete hook
+   */
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }

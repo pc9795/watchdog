@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {Monitor, MonitorType} from '../../models/monitor';
+import {Monitor} from '../../models/monitor';
 import {MonitorsService} from '../../services/monitors.service';
 import {HttpErrorResponse} from '@angular/common/http';
 import {AlertService} from '../../services/alert.service';
@@ -13,7 +13,7 @@ enum MonitorStatus {
 }
 
 /**
- * Component carrying the monitors
+ * Component for home page which contains the list of all monitors. You can create/edit/delete monitors through this screen.
  */
 @Component({
   selector: 'app-home',
@@ -22,51 +22,47 @@ enum MonitorStatus {
 })
 export class HomeComponent implements OnInit {
 
-  monitors: Monitor[];
-  monitorStatus = new Map();
+  monitors: Monitor[]; // Monitors for the user
+  monitorStatus = new Map(); // Map to store the status of each monitor
 
   constructor(private monitorService: MonitorsService, private alertService: AlertService, private router: Router) {
     // Get monitors.
-    this.monitorService.getMonitors().subscribe(data => {
-      this.monitors = data as Monitor[];
-      this.monitors.map(obj => this.monitorStatus.set(obj.id, MonitorStatus.WARMING));
-      this.monitors.forEach(
-        obj => {
-          this.monitorService.getMonitorStatus(obj.id).subscribe(
-            data2 => {
-              this.monitorStatus.set((data2 as MonitorLog).monitorId,
-                (data2 as MonitorLog).status ? MonitorStatus.WORKING : MonitorStatus.NOT_WORKING);
-            }, error2 => this.alertService.error(error2)
-          );
-        }
-      );
-    }, (error: HttpErrorResponse) => {
-      this.alertService.error(error);
-    });
+    this.monitorService.getMonitors().subscribe(
+      // Success
+      data => {
+        this.monitors = data as Monitor[];
+        // Initially load all the monitors in the map
+        this.monitors.map(obj => this.monitorStatus.set(obj.id, MonitorStatus.WARMING));
+        // Fetch status of all the monitors
+        this.monitors.forEach(obj => this.getStatus(obj.id));
+      },
+      // Error
+      (error: HttpErrorResponse) => {
+        this.alertService.error(error);
+      });
   }
 
-  ngOnInit() {
-  }
-
-  isHTTPMonitor(monitor: Monitor): boolean {
-    return monitor.type === MonitorType.HTTP_MONITOR;
-  }
-
-  isSocketMonitor(monitor: Monitor): boolean {
-    return monitor.type === MonitorType.SOCKET_MONITOR;
-  }
-
+  /**
+   * Get status of a particular monitor
+   */
   getStatus(monitorId: number) {
     this.monitorService.getMonitorStatus(monitorId).subscribe(
+      // Success
       data2 => {
+        // Update status
         this.monitorStatus.set((data2 as MonitorLog).monitorId,
           (data2 as MonitorLog).status ? MonitorStatus.WORKING : MonitorStatus.NOT_WORKING);
-      }, error2 => this.alertService.error(error2)
+      },
+      // Error
+      error2 => this.alertService.error(error2)
     );
   }
 
-  // Refresh hack
+  /**
+   * Refresh hack for Angular
+   */
   refresh() {
+    // Navigating to some other url and then coming back to orignal. It will be so fast that not be observed.
     this.router.navigateByUrl('/createMonitor', {skipLocationChange: true}).then(
       () => {
         this.router.navigate(['/']);
@@ -74,6 +70,9 @@ export class HomeComponent implements OnInit {
     );
   }
 
+  /**
+   * Get html code corresponding to monitor status.
+   */
   getMonitorStatus(monitorId: number): string {
     switch (this.monitorStatus.get(monitorId)) {
       case MonitorStatus.WARMING:
@@ -86,6 +85,9 @@ export class HomeComponent implements OnInit {
     return '';
   }
 
+  /**
+   * Convert value in seconds to text.
+   */
   monitoringIntervalInSecToMonitoringIntervalInText(seconds: number | string) {
     seconds = Number(seconds);
     const minutes = seconds / 60;
@@ -95,14 +97,28 @@ export class HomeComponent implements OnInit {
     return `${minutes / 60} hours`;
   }
 
+  /**
+   * Handle delete monitor button
+   */
   deleteMonitor(monitorId: number) {
+    // Confirm dialog. Can use a fancy modal for future.
     if (confirm('Are you sure to delete this Monitor')) {
       // Delete events created by logged in user.
-      this.monitorService.deleteEvent(monitorId).subscribe(data => {
-        this.alertService.success('Monitor deleted successfully!', true);
-        this.refresh();
-      }, error => this.alertService.error(error));
+      this.monitorService.deleteEvent(monitorId).subscribe(
+        // Success
+        data => {
+          this.alertService.success('Monitor deleted successfully!', true);
+          this.refresh();
+        },
+        // Error
+        error => this.alertService.error(error));
     }
+  }
+
+  /**
+   * Initialiaztion hook
+   */
+  ngOnInit(): void {
   }
 
 }

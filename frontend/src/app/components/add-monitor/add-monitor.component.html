@@ -1,11 +1,16 @@
 <div class="container">
+
   <div class="row mt-5">
     <div class="col-6 offset-3">
       <h3 class="text-secondary text-center text-capitalize">Create a new monitor</h3>
     </div>
   </div>
+
   <div class="row mt-3">
+
+    <!--Create new monitor form-->
     <form class="col-4 offset-4" (ngSubmit)="onSubmit()" [formGroup]="monitorForm">
+
       <select class="form-control" formControlName="type" #monitorType>
         <option value="" selected>Choose Monitor...</option>
         <option value="{{type}}" *ngFor="let type of monitorTypes">{{type}}</option>
@@ -13,6 +18,7 @@
 
       <input type="text" placeholder="Name" class="form-control mt-2" formControlName="name"
              [ngClass]="{ 'is-invalid': submitted && f.name.errors }" required>
+      <!--Errors pop up-->
       <div *ngIf="submitted && f.name.errors" class="invalid-feedback">
         <div *ngIf="f.name.errors.required">Name is required</div>
         <div *ngIf="f.name.errors.minlength">Name should be greater than
@@ -25,6 +31,7 @@
 
       <input type="text" placeholder="IP or Hostname" class="form-control mt-2" formControlName="ipOrHost"
              [ngClass]="{ 'is-invalid': submitted && f.ipOrHost.errors }" required>
+      <!--Errors pop up-->
       <div *ngIf="submitted && f.ipOrHost.errors" class="invalid-feedback">
         <div *ngIf="f.ipOrHost.errors.required">IP or Hostname is required</div>
         <div *ngIf="f.ipOrHost.errors.minlength">IP or Hostname should be greater than
@@ -36,17 +43,21 @@
       </div>
 
       <div class="input-group mt-2">
-        <input id="monitoringInterval" type="range" class="custom-range" min="5" max="144"
-               formControlName="monitoringInterval" #monitoringInterval [value]="5">
+        <input id="monitoringInterval" type="range" class="custom-range" [min]="Utils.minRange" [max]="Utils.maxRange"
+               formControlName="monitoringInterval" #monitoringInterval [value]="Utils.minRange">
         <div class="input-group-append">
-          <span class="ml-1">{{formatMonitoringInterval(monitoringInterval.value)}}</span>
+          <span class="ml-1">{{Utils.rangeToMonitoringIntervalInText(monitoringInterval.value)}}</span>
         </div>
       </div>
+
       <input type="number" class="form-control" placeholder="Expected Status code" formControlName="expectedStatusCode"
-             *ngIf="isHTTPMonitor(monitorType.value)">
+             *ngIf="monitorType.type===HTTP_MONITOR">
+
       <input type="number" placeholder="Socket Port" class="form-control" formControlName="socketPort"
-             *ngIf="isSocketMonitor(monitorType.value)">
+             *ngIf="monitorType.type===SOCKET_MONITOR">
+
       <button [disabled]="loading" class="btn btn-success form-control mt-2">Add<i class="ml-1 fa fa-plus"></i></button>
+
     </form>
   </div>
 </div>

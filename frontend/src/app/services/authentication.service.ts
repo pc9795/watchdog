@@ -22,6 +22,9 @@ export class AuthenticationService {
     this.currentUser = this.currentUserSubject.asObservable();
   }
 
+  /**
+   * Get the logged in user's username
+   */
   public get currentUserValue(): User {
     return this.currentUserSubject.value;
   }
@@ -33,8 +36,11 @@ export class AuthenticationService {
     localStorage.removeItem('currentUser');
     this.currentUserSubject.next(null);
     this.http.get(`${environment.server}logout`, {withCredentials: true}).subscribe(
+      // Success
       data => {
-      }, error => {
+      },
+      // Error
+      error => {
         this.alertService.error(error);
       }
     );

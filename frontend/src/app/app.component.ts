@@ -3,6 +3,9 @@ import {Router} from '@angular/router';
 import {AuthenticationService} from './services/authentication.service';
 import {User} from './models/user';
 
+/**
+ * Main component for the app.
+ */
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',

@@ -1,9 +1,7 @@
 package core.beans;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 27-12-2019 04:04
- * Purpose: TODO:
+ * Purpose: Response from notification service
  **/
 public class NotificationResult {
     private boolean success;

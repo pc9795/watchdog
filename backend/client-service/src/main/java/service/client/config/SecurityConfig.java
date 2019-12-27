@@ -23,8 +23,6 @@ import java.util.Arrays;
 import java.util.Collections;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 25-10-2019 19:33
  * Purpose: Spring security configuration.
  **/
 @Configuration

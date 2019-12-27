@@ -8,8 +8,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 27-12-2019 00:45
  * Purpose: Listener to log cluster events.
  **/
 public class ClusterListener extends AbstractActor {
@@ -20,6 +18,11 @@ public class ClusterListener extends AbstractActor {
         return Props.create(ClusterListener.class);
     }
 
+    /**
+     * Before start hook
+     *
+     * @throws Exception when error
+     */
     @Override
     public void preStart() throws Exception {
         // Subscribe to cluster events
@@ -29,12 +32,20 @@ public class ClusterListener extends AbstractActor {
         );
     }
 
+    /**
+     * After stop hook
+     */
     @Override
     public void aroundPostStop() {
         //Unsubscribe to events
         cluster.unsubscribe(getSelf());
     }
 
+    /**
+     * Beahviors configuration
+     *
+     * @return configuration object
+     */
     @Override
     public Receive createReceive() {
         return receiveBuilder()

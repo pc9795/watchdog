@@ -9,8 +9,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 27-12-2019 00:09
  * Purpose: Utility methods for this project
  **/
 public final class Utils {
@@ -18,11 +16,17 @@ public final class Utils {
 
     }
 
+    /**
+     * Send an email from the given details
+     *
+     * @param message email message
+     * @throws MessagingException exception in mailing API
+     */
     public static void sendEmail(EmailMessage message) throws MessagingException {
         Message messageObj = new MimeMessage(Constants.emailSession);
         messageObj.setFrom(new InternetAddress(Constants.emailFromAddr));
         messageObj.setRecipient(Message.RecipientType.TO, new InternetAddress(message.getTo()));
-        messageObj.setSubject(message.getSubject());
+        messageObj.setSubject(String.format("%s - %s", Constants.emailSubject, message.getSubject()));
         messageObj.setText(message.getMessage());
 
         Transport.send(messageObj);

@@ -16,8 +16,6 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 22-11-2019 00:40
  * Purpose: User of the application
  **/
 @Entity

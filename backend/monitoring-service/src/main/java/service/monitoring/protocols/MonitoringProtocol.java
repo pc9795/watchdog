@@ -6,8 +6,6 @@ import core.entities.mongodb.MonitorLog;
 import java.util.List;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 06-12-2019 00:57
  * Purpose: Messaging protocol between master and actor
  **/
 public class MonitoringProtocol {

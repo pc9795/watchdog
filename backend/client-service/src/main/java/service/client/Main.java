@@ -16,8 +16,6 @@ import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 22-11-2019 00:32
  * Purpose: Entry point of the application
  **/
 @EnableWebSecurity //Enable spring security

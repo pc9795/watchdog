@@ -23,8 +23,6 @@ import java.security.Principal;
 import java.util.List;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 22-11-2019 00:33
  * Purpose: REST resource for accessing monitor.
  * NOTE: we have not decided to put a status check on /GET/{id}, /PUT, and /DELETE as it causes no harm. There is no
  * meaning to edit, access or try to delete an already stopped monitor.
@@ -55,9 +53,9 @@ public class MonitorResource {
     @GetMapping()
     public List<BaseMonitor> getAllMonitors(Principal principal) {
         User user = userRepository.findUserByUsername(principal.getName());
-        //No need to include monitors with the status TO_BE_STOPPED as they will be eventually stopped by the monitor-
-        //service and the application doesn't support resuming functionality. We are using the world "stopping" here
-        // monitor-service can choose to delete monitors or keep them with STOPPED status for analysis purposes and
+        // No need to include monitors with the status TO_BE_STOPPED as they will be eventually stopped by the monitor-
+        // service and the application doesn't support resuming functionality. We are using the world "stopping" here
+        // as monitor-service can choose to delete monitors or keep them with STOPPED status for analysis purposes and
         // then we can archive them manually or schedule timely archival.
         return monitorRepository.findAllByUserAndStatus(user, BaseMonitor.Status.ACTIVE);
     }
@@ -153,7 +151,7 @@ public class MonitorResource {
      *
      * @param monitorId db id of the monitor.
      * @param principal logged in user
-     * @return latest log entry of the monitor.
+     * @return latest log entry of the monitor. It can also return null if monitoring is not started.
      */
     @GetMapping("/{monitor_id}/status")
     public MonitorLog getMonitorStatus(@PathVariable("monitor_id") long monitorId, Principal principal) {

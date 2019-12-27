@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * Utility methods for the project
+ * Purpose: Utility methods for the project
  */
 public final class Utils {
     private Utils() {

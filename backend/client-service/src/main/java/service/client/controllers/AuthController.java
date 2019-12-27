@@ -21,7 +21,7 @@ import javax.validation.Valid;
 import java.io.IOException;
 
 /**
- * Controller for authentication
+ * Purpose: Controller for authentication
  */
 @RestController
 public class AuthController {

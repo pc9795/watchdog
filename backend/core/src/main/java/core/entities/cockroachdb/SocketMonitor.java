@@ -5,8 +5,6 @@ import javax.persistence.Entity;
 import javax.validation.constraints.Positive;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 22-11-2019 00:41
  * Purpose: Monitor for socket addresses
  **/
 @Entity

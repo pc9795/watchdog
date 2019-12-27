@@ -1,7 +1,7 @@
 package service.client.exceptions;
 
 /**
- * When the user with a username already exists.
+ * Purpose: When the user with a username already exists.
  */
 public class UserAlreadyExistException extends Exception {
 

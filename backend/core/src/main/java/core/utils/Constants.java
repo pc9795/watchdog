@@ -1,8 +1,6 @@
 package core.utils;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 24-12-2019 18:40
  * Purpose: Constants for the project
  **/
 public final class Constants {

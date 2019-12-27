@@ -19,8 +19,6 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 06-12-2019 00:56
  * Purpose: Master actor which will control child actors for work
  **/
 public class MasterActor extends AbstractActor {
@@ -46,6 +44,17 @@ public class MasterActor extends AbstractActor {
         this.pageable = PageRequest.of(0, workSize);
     }
 
+    /**
+     * Actor configuration object
+     *
+     * @param monitorRepository    repostiory to access monitors
+     * @param monitorLogRepository repostiory to access monitor logs
+     * @param pollingInterval      interval between db requests
+     * @param masterCount          no of master workers
+     * @param parent               index of this master
+     * @param workSize             no of records to pull
+     * @return configuration object
+     */
     public static Props props(MonitorRepository monitorRepository, MonitorLogRepository monitorLogRepository,
                               int pollingInterval, int masterCount, int parent, int workSize) {
         return Props.create(MasterActor.class, monitorRepository, monitorLogRepository,

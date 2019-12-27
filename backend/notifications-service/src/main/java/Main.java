@@ -26,13 +26,16 @@ import java.util.Properties;
 import static akka.http.javadsl.server.Directives.concat;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 26-12-2019 23:56
  * Purpose: Entry point for the program.
  **/
 public class Main {
     private static Logger LOGGER = LogManager.getLogger(Main.class);
 
+    /**
+     * Maiin function
+     *
+     * @param args command line arguments
+     */
     public static void main(String[] args) {
         try {
             loadConfiguration();
@@ -45,29 +48,38 @@ public class Main {
         startActorSystem();
     }
 
+    /**
+     * Start the actor system
+     */
     private static void startActorSystem() {
-        //Create the actor system
-        ActorSystem system = ActorSystem.create("notificationActorSystem");
-        //Create the cluster listener actor
-        system.actorOf(ClusterListener.props(), "clusterListener");
+        ActorSystem system = ActorSystem.create("notificationActorSystem");//Create the actor system
+        system.actorOf(ClusterListener.props(), "clusterListener");//listener actor
         //Create the node actor which represent a single entity in the cluster
         ActorRef node = system.actorOf(ClusterNode.props(Constants.workers), "node");
+
         //Get management routes from AkkaManagement module.
         Route managementRoutes = AkkaManagement.get(system).getRoutes();
 
+        //Get the routes for notification
         Duration askTimeout = system.settings().config().getDuration("akka.routes.ask-timeout");
-        String hostname = system.settings().config().getString("akka.management.http.hostname");
-        int port = system.settings().config().getInt("akka.management.http.port");
         Route notificationRoutes = new NotificationRoutes(node, askTimeout).routes();
 
+        //Setup http server
         Http http = Http.get(system);
         Materializer materializer = Materializer.createMaterializer(system);
         Route allRoutes = concat(managementRoutes, notificationRoutes);
         Flow<HttpRequest, HttpResponse, NotUsed> flow = allRoutes.flow(system, materializer);
+        String hostname = system.settings().config().getString("akka.management.http.hostname");
+        int port = system.settings().config().getInt("akka.management.http.port");
         http.bindAndHandle(flow, ConnectHttp.toHost(hostname, port), materializer);
         LOGGER.info(String.format("AKKA Http server is running at %s:%s...", hostname, port));
     }
 
+    /**
+     * Load the configuration from properties and environment variables
+     *
+     * @throws IOException if error in loading config from properties file
+     */
     private static void loadConfiguration() throws IOException {
         //Loading config from properties file.
         Properties config = new Properties();

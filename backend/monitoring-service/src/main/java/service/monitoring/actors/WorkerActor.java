@@ -17,8 +17,6 @@ import java.time.Duration;
 import java.util.logging.Logger;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 06-12-2019 00:56
  * Purpose: Child actor which will be responsible for monitoring a particular monitor
  **/
 public class WorkerActor extends AbstractActor {
@@ -31,7 +29,14 @@ public class WorkerActor extends AbstractActor {
         this.monitor = monitor;
     }
 
-    public static Props props(ActorRef parent, BaseMonitor monitor) {
+    /**
+     * Actor configuration object
+     *
+     * @param parent  parent actor
+     * @param monitor monitor of this worker
+     * @return configuration object
+     */
+    static Props props(ActorRef parent, BaseMonitor monitor) {
         return Props.create(WorkerActor.class, parent, monitor);
     }
 
@@ -67,7 +72,6 @@ public class WorkerActor extends AbstractActor {
             log = Utils.checkPortWorking(socketMonitor.getIpOrHost(), socketMonitor.getSocketPort());
 
         } else {
-            //todo add custom exception
             throw new RuntimeException(String.format("%s is not mapped", monitor.getClass().getName()));
         }
         //Update log with details to identify it

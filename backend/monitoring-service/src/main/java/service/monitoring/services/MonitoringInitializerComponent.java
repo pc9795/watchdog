@@ -16,8 +16,6 @@ import service.monitoring.protocols.MonitoringProtocol;
 import java.util.List;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 06-12-2019 00:49
  * Purpose: It will initialize the actor system
  **/
 @Component

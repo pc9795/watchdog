@@ -10,8 +10,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 22-11-2019 00:44
  * Purpose: Repository for Monitor resource
  **/
 public interface MonitorRepository extends JpaRepository<BaseMonitor, Long> {

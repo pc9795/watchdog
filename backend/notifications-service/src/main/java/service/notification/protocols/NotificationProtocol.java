@@ -5,11 +5,12 @@ import core.beans.EmailMessage;
 import core.beans.NotificationResult;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 27-12-2019 01:38
- * Purpose: TODO:
+ * Purpose: Messages between actors in the system
  **/
 public class NotificationProtocol {
+    /**
+     * Message to send email message and reply back to an actor about it.
+     */
     public static class NotifyEmail {
         private final EmailMessage message;
         private final ActorRef replyTo;
@@ -33,6 +34,9 @@ public class NotificationProtocol {
         }
     }
 
+    /**
+     * Response of a notification action.
+     */
     public static class NotifyResponse {
         private final NotificationResult result;
 

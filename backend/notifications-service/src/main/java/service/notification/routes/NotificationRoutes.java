@@ -14,23 +14,34 @@ import java.util.concurrent.CompletionStage;
 import static akka.pattern.Patterns.ask;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 27-12-2019 03:15
- * Purpose: TODO:
+ * Purpose: Routes for this microservice
  **/
 public class NotificationRoutes extends AllDirectives {
-    private ActorRef node;
-    private Duration askTimeout;
+    private ActorRef node; //Cluster representative which will handle all requests
+    private Duration askTimeout; //Time out of ask requests
 
     public NotificationRoutes(ActorRef node, Duration askTimeout) {
         this.node = node;
         this.askTimeout = askTimeout;
     }
 
+    /**
+     * Notify using a email with given message
+     *
+     * @param message email message
+     * @return completion stage object
+     */
     private CompletionStage notify(EmailMessage message) {
         return ask(node, new NotificationProtocol.NotifyEmail(message), askTimeout);
     }
 
+    /**
+     * Definition of routes.
+     * Currently supported routes;
+     * POST:/notifications/ -> Send an EmailMessage for email notification
+     *
+     * @return route object
+     */
     public Route routes() {
         return post(
                 () -> pathPrefix("notifications", () -> pathEndOrSingleSlash(

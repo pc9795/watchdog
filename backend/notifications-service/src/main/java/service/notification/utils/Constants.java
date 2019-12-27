@@ -4,8 +4,6 @@ import javax.mail.Session;
 import java.util.Properties;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 26-12-2019 23:32
  * Purpose: Constants for this project
  **/
 public final class Constants {

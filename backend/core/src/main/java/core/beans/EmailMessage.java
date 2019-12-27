@@ -3,8 +3,6 @@ package core.beans;
 import java.io.Serializable;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 27-12-2019 01:43
  * Purpose: Bean representing a email message to send.
  **/
 public class EmailMessage implements Serializable {

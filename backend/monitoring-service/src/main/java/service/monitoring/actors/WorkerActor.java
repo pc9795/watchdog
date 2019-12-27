@@ -3,11 +3,13 @@ package service.monitoring.actors;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import akka.actor.Props;
 import core.entities.cockroachdb.BaseMonitor;
 import core.entities.cockroachdb.HttpMonitor;
 import core.entities.cockroachdb.PingMonitor;
 import core.entities.cockroachdb.SocketMonitor;
 import core.entities.mongodb.MonitorLog;
+import service.monitoring.protocols.MonitoringProtocol;
 import service.monitoring.utils.Constants;
 import service.monitoring.utils.Utils;
 
@@ -27,6 +29,10 @@ public class WorkerActor extends AbstractActor {
     public WorkerActor(ActorRef master, BaseMonitor monitor) {
         this.master = master;
         this.monitor = monitor;
+    }
+
+    public static Props props(ActorRef parent, BaseMonitor monitor) {
+        return Props.create(WorkerActor.class, parent, monitor);
     }
 
     /**

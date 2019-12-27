@@ -2,10 +2,6 @@ package service.monitoring.services;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.cluster.Cluster;
-import akka.http.javadsl.server.Route;
-import akka.management.cluster.javadsl.ClusterHttpManagementRoutes;
 import akka.management.javadsl.AkkaManagement;
 import core.repostiories.cockroachdb.MonitorRepository;
 import core.repostiories.mongodb.MonitorLogRepository;
@@ -13,8 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import service.monitoring.actors.ClusterListener;
 import service.monitoring.actors.MasterActor;
-import service.monitoring.actors.MonitoringProtocol;
+import service.monitoring.protocols.MonitoringProtocol;
 
 import java.util.List;
 
@@ -50,12 +47,13 @@ public class MonitoringInitializerComponent implements CommandLineRunner {
     @Override
     public void run(String... args) {
         ActorSystem system = ActorSystem.create("monitoringActorSystem");
+        //Create the cluster listener actor
+        system.actorOf(ClusterListener.props(), "clusterListener");
         AkkaManagement.get(system).start();
-        Cluster cluster = Cluster.get(system);
-        Route allRoutes = ClusterHttpManagementRoutes.all(cluster);
+
         for (Integer parent : masterList) {
             //Create master actor
-            ActorRef master = system.actorOf(Props.create(MasterActor.class, monitorRepository, monitorLogRepository,
+            ActorRef master = system.actorOf(MasterActor.props(monitorRepository, monitorLogRepository,
                     pollingInterval, masterCount, parent, workSize), String.format("Master_Actor_%s", parent));
             //Seed message for master
             master.tell(new MonitoringProtocol.FindWork(), master);

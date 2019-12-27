@@ -10,6 +10,7 @@ import core.repostiories.cockroachdb.MonitorRepository;
 import core.repostiories.mongodb.MonitorLogRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import service.monitoring.protocols.MonitoringProtocol;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -43,6 +44,12 @@ public class MasterActor extends AbstractActor {
         this.index = index;
         this.lastRetrievedId = -1;
         this.pageable = PageRequest.of(0, workSize);
+    }
+
+    public static Props props(MonitorRepository monitorRepository, MonitorLogRepository monitorLogRepository,
+                              int pollingInterval, int masterCount, int parent, int workSize) {
+        return Props.create(MasterActor.class, monitorRepository, monitorLogRepository,
+                pollingInterval, masterCount, parent, workSize);
     }
 
     /**
@@ -86,7 +93,7 @@ public class MasterActor extends AbstractActor {
         LOG.info("Assigning Work...");
         for (BaseMonitor monitor : monitors) {
             //Create child actor
-            ActorRef child = getContext().actorOf(Props.create(WorkerActor.class, getSelf(), monitor));
+            ActorRef child = getContext().actorOf(WorkerActor.props(getSelf(), monitor));
             this.monitorToActor.put(monitor.getId(), child);
             //Tell it to start work
             child.tell(new MonitoringProtocol.StartWork(), getSelf());

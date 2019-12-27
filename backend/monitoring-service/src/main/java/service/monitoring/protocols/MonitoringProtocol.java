@@ -1,4 +1,4 @@
-package service.monitoring.actors;
+package service.monitoring.protocols;
 
 import core.entities.cockroachdb.BaseMonitor;
 import core.entities.mongodb.MonitorLog;
@@ -21,14 +21,14 @@ public class MonitoringProtocol {
     /**
      * Message for master to assign monitors to child actors
      */
-    static class AssignWork {
+    public static class AssignWork {
         private List<BaseMonitor> monitors;
 
-        AssignWork(List<BaseMonitor> monitors) {
+        public AssignWork(List<BaseMonitor> monitors) {
             this.monitors = monitors;
         }
 
-        List<BaseMonitor> getMonitors() {
+        public List<BaseMonitor> getMonitors() {
             return monitors;
         }
     }
@@ -36,28 +36,28 @@ public class MonitoringProtocol {
     /**
      * Message for child actor to start work
      */
-    static class StartWork {
+    public static class StartWork {
 
     }
 
     /**
      * Message for master to wait some time
      */
-    static class Wait {
+    public static class Wait {
 
     }
 
     /**
      * Message for master to update the monitoring log
      */
-    static class UpdateWork {
+    public static class UpdateWork {
         private MonitorLog monitorLog;
 
-        UpdateWork(MonitorLog monitorLog) {
+        public UpdateWork(MonitorLog monitorLog) {
             this.monitorLog = monitorLog;
         }
 
-        MonitorLog getMonitorLog() {
+        public MonitorLog getMonitorLog() {
             return monitorLog;
         }
     }
@@ -65,7 +65,7 @@ public class MonitoringProtocol {
     /**
      * Message for parent to delete work for deleted monitors.
      */
-    static class DeleteWork {
+    public static class DeleteWork {
 
     }
 

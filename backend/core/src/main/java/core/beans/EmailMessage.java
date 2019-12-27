@@ -10,6 +10,15 @@ public class EmailMessage implements Serializable {
     private String subject;
     private String message;
 
+    public EmailMessage() {
+    }
+
+    public EmailMessage(String to, String subject, String message) {
+        this.to = to;
+        this.subject = subject;
+        this.message = message;
+    }
+
     public String getTo() {
         return to;
     }

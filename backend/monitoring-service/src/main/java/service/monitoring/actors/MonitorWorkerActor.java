@@ -19,12 +19,12 @@ import java.util.logging.Logger;
 /**
  * Purpose: Child actor which will be responsible for monitoring a particular monitor
  **/
-public class WorkerActor extends AbstractActor {
-    private static Logger LOG = Logger.getLogger(WorkerActor.class.toString()); //Logger object
+public class MonitorWorkerActor extends AbstractActor {
+    private static Logger LOG = Logger.getLogger(MonitorWorkerActor.class.toString()); //Logger object
     private ActorRef master; //Reference to its parent
     private BaseMonitor monitor; //Monitor which it has to handle
 
-    public WorkerActor(ActorRef master, BaseMonitor monitor) {
+    public MonitorWorkerActor(ActorRef master, BaseMonitor monitor) {
         this.master = master;
         this.monitor = monitor;
     }
@@ -37,7 +37,7 @@ public class WorkerActor extends AbstractActor {
      * @return configuration object
      */
     static Props props(ActorRef parent, BaseMonitor monitor) {
-        return Props.create(WorkerActor.class, parent, monitor);
+        return Props.create(MonitorWorkerActor.class, parent, monitor);
     }
 
     /**
@@ -80,7 +80,7 @@ public class WorkerActor extends AbstractActor {
         log.setUsername(monitor.getUser().getUsername());
 
         //Send the logs to master
-        master.tell(new MonitoringProtocol.UpdateWork(log), getSelf());
+        master.tell(new MonitoringProtocol.UpdateLog(log, monitor), getSelf());
 
         //Wait for the time assigned in the monitor
         ActorSystem system = getContext().system();

@@ -28,10 +28,6 @@ import javax.validation.constraints.Positive;
 })
 public class BaseMonitor {
 
-    public enum Status {
-        ACTIVE, TO_BE_STOPPED, STOPPED
-    }
-
     @Id
     @GeneratedValue
     private long id;
@@ -50,11 +46,6 @@ public class BaseMonitor {
     @Min(value = core.utils.Constants.MINIMUM_MONITORING_INTERVAL)
     @Max(value = core.utils.Constants.MAXIMUM_MONITORING_INTERVAL)
     private int monitoringInterval;
-
-    @JsonIgnore //No need to expose
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private Status status;
 
     @JsonIgnore
     @ManyToOne
@@ -102,14 +93,6 @@ public class BaseMonitor {
 
     public void setMonitoringInterval(int monitoringInterval) {
         this.monitoringInterval = monitoringInterval;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
     }
 
     public User getUser() {

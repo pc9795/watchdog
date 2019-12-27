@@ -1,6 +1,7 @@
 package service.monitoring.actors;
 
 import akka.actor.*;
+import core.beans.EmailMessage;
 import core.entities.cockroachdb.BaseMonitor;
 import core.entities.mongodb.MonitorLog;
 import core.repostiories.cockroachdb.MonitorRepository;
@@ -69,7 +70,7 @@ public class MasterActor extends AbstractActor {
                 match(MonitoringProtocol.FindWork.class, obj -> findWork()).
                 match(MonitoringProtocol.AssignWork.class, obj -> assignWork(obj.getMonitors())).
                 match(MonitoringProtocol.Wait.class, obj -> waitForSomeTime()).
-                match(MonitoringProtocol.UpdateWork.class, obj -> updateLog(obj.getMonitorLog())).
+                match(MonitoringProtocol.UpdateLog.class, obj -> updateLog(obj.getMonitorLog(), obj.getMonitor())).
                 match(MonitoringProtocol.EditMonitorRequest.class, obj -> editWork(obj.getId(), obj.getMonitor(),
                         getSender())).
                 match(MonitoringProtocol.DeleteMonitorRequest.class, obj -> deleteWork(obj.getId(), getSender())).
@@ -103,11 +104,12 @@ public class MasterActor extends AbstractActor {
         LOG.info("Assigning Work...");
         for (BaseMonitor monitor : monitors) {
             //Create child actor
-            ActorRef child = getContext().actorOf(WorkerActor.props(getSelf(), monitor));
+            ActorRef child = getContext().actorOf(MonitorWorkerActor.props(getSelf(), monitor));
             this.monitorToActor.put(monitor.getId(), child);
             //Tell it to start work
             child.tell(new MonitoringProtocol.StartWork(), getSelf());
         }
+        getSelf().tell(new MonitoringProtocol.Wait(), getSelf());
     }
 
     /**
@@ -126,22 +128,47 @@ public class MasterActor extends AbstractActor {
      *
      * @param monitorLog monitor log object
      */
-    private void updateLog(MonitorLog monitorLog) {
+    private void updateLog(MonitorLog monitorLog, BaseMonitor monitor) {
         LOG.info(String.format("Updating Log...%s", monitorLog.toString()));
         monitorLogRepository.save(monitorLog);
+        if (monitorLog.isWorking()) {
+            return;
+        }
+        EmailMessage message =
+                new EmailMessage(monitor.getUser().getEmail(), monitor.getName(), monitorLog.getErrorMessage());
+        ActorRef httpWorker = getContext().actorOf(HttpWorkerActor.props());
+        httpWorker.tell(new MonitoringProtocol.NotifyEmail(message), getSelf());
     }
 
     private void deleteWork(long id, ActorRef replyTo) {
-        //todo uncomment
-        //getContext().stop(monitorToActor.get(id));
+        if (id % this.masterCount != this.index) {
+            //Not belong to this master
+            return;
+        }
+        if (!monitorToActor.containsKey(id)) {
+            //If this is the master and this work is not handled by it.
+            replyTo.tell(new Status.Failure(new Exception(String.format("Monitor with id:%s is currently not handled by " +
+                    "this master", id))), getSelf());
+            return;
+        }
+        getContext().stop(monitorToActor.get(id));
         replyTo.tell(new MonitoringProtocol.DeleteMonitorResponse(), getSelf());
     }
 
     private void editWork(long id, BaseMonitor monitor, ActorRef replyTo) {
-        //todo uncomment
-        //getContext().stop(monitorToActor.get(id));
-        //ActorRef child = getContext().actorOf(WorkerActor.props(getSelf(), monitor));
-        //this.monitorToActor.put(monitor.getId(), child);
+        if (id % this.masterCount != this.index) {
+            //Not belong to this master
+            return;
+        }
+        if (!monitorToActor.containsKey(id)) {
+            //If this is the master and this work is not handled by it.
+            replyTo.tell(new Status.Failure(new Exception(String.format("Monitor with id:%s is currently not handled by " +
+                    "this master", id))), getSelf());
+            return;
+        }
+        getContext().stop(monitorToActor.get(id));
+        ActorRef child = getContext().actorOf(MonitorWorkerActor.props(getSelf(), monitor));
+        this.monitorToActor.put(monitor.getId(), child);
         replyTo.tell(new MonitoringProtocol.EditMonitorResponse(), getSelf());
     }
 

@@ -15,7 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import service.client.exceptions.BadDataException;
 import service.client.exceptions.ForbiddenResourceException;
+import service.client.exceptions.MonitoringServiceException;
 import service.client.exceptions.ResourceNotFoundException;
+import service.client.service.MonitoringServiceClient;
 import service.client.utils.Constants;
 
 import javax.validation.Valid;
@@ -34,13 +36,15 @@ public class MonitorResource {
     private final MonitorRepository monitorRepository;
     private final UserRepository userRepository;
     private final MonitorLogRepository monitorLogRepository;
+    private final MonitoringServiceClient monitoringServiceClient;
 
     @Autowired
     public MonitorResource(MonitorRepository monitorRepository, UserRepository userRepository,
-                           MonitorLogRepository monitorLogRepository) {
+                           MonitorLogRepository monitorLogRepository, MonitoringServiceClient monitoringServiceClient) {
         this.monitorRepository = monitorRepository;
         this.userRepository = userRepository;
         this.monitorLogRepository = monitorLogRepository;
+        this.monitoringServiceClient = monitoringServiceClient;
     }
 
 
@@ -53,11 +57,7 @@ public class MonitorResource {
     @GetMapping()
     public List<BaseMonitor> getAllMonitors(Principal principal) {
         User user = userRepository.findUserByUsername(principal.getName());
-        // No need to include monitors with the status TO_BE_STOPPED as they will be eventually stopped by the monitor-
-        // service and the application doesn't support resuming functionality. We are using the world "stopping" here
-        // as monitor-service can choose to delete monitors or keep them with STOPPED status for analysis purposes and
-        // then we can archive them manually or schedule timely archival.
-        return monitorRepository.findAllByUserAndStatus(user, BaseMonitor.Status.ACTIVE);
+        return monitorRepository.findAllByUser(user);
     }
 
     /**
@@ -87,7 +87,6 @@ public class MonitorResource {
     public BaseMonitor createMonitor(@Valid @RequestBody BaseMonitor monitor, Principal principal) {
         User user = userRepository.findUserByUsername(principal.getName());
         monitor.setUser(user); //Maintaining foreign key constraint
-        monitor.setStatus(BaseMonitor.Status.ACTIVE);
         return monitorRepository.save(monitor); //Save
     }
 
@@ -123,6 +122,9 @@ public class MonitorResource {
         } else if (monitor instanceof SocketMonitor) {
             ((SocketMonitor) dbMonitor).setSocketPort(((SocketMonitor) monitor).getSocketPort());
         }
+        if (!monitoringServiceClient.editMonitor(monitorId, dbMonitor)) {
+            throw new MonitoringServiceException("Could not able to edit the monitor right now!");
+        }
         //Save
         return monitorRepository.save(dbMonitor);
     }
@@ -139,11 +141,11 @@ public class MonitorResource {
     public void deleteAUsersMonitor(@PathVariable("monitor_id") long monitorId, Principal principal)
             throws ResourceNotFoundException, ForbiddenResourceException {
         BaseMonitor dbMonitor = getUsersMonitor(monitorId, principal.getName());
-        //Delete - can't delete directly as monitor-service will not know about it. This intermediate state is a indicator
-        //for monitor-service to stop its monitoring then either delete it permanently or keep it for analytics as
-        //application doesn't support resuming.
-        dbMonitor.setStatus(BaseMonitor.Status.TO_BE_STOPPED);
-        monitorRepository.save(dbMonitor);
+        if (!monitoringServiceClient.deleteMonitor(monitorId)) {
+            throw new MonitoringServiceException("Could not able to delete the monitor right now!");
+        }
+        //Delete
+        monitorRepository.delete(dbMonitor);
     }
 
     /**

@@ -1,6 +1,7 @@
 package service.monitoring.protocols;
 
 import akka.actor.ActorRef;
+import core.beans.EmailMessage;
 import core.entities.cockroachdb.BaseMonitor;
 import core.entities.mongodb.MonitorLog;
 
@@ -50,15 +51,21 @@ public class MonitoringProtocol {
     /**
      * Message for master to update the monitoring log
      */
-    public static class UpdateWork {
+    public static class UpdateLog {
         private MonitorLog monitorLog;
+        private BaseMonitor monitor;
 
-        public UpdateWork(MonitorLog monitorLog) {
+        public UpdateLog(MonitorLog monitorLog, BaseMonitor monitor) {
             this.monitorLog = monitorLog;
+            this.monitor = monitor;
         }
 
         public MonitorLog getMonitorLog() {
             return monitorLog;
+        }
+
+        public BaseMonitor getMonitor() {
+            return monitor;
         }
     }
 
@@ -160,6 +167,18 @@ public class MonitoringProtocol {
 
         public BaseMonitor getMonitor() {
             return monitor;
+        }
+    }
+
+    public static class NotifyEmail {
+        private EmailMessage message;
+
+        public NotifyEmail(EmailMessage message) {
+            this.message = message;
+        }
+
+        public EmailMessage getMessage() {
+            return message;
         }
     }
 }

@@ -25,34 +25,24 @@ public interface MonitorRepository extends JpaRepository<BaseMonitor, Long> {
     /**
      * Find all monitors for a give user with give status
      *
-     * @param user   user object
-     * @param status status of the monitor
+     * @param user user object
      * @return list of monitors
      */
-    List<BaseMonitor> findAllByUserAndStatus(User user, BaseMonitor.Status status);
+    List<BaseMonitor> findAllByUser(User user);
 
     /**
-     * Find a list of active monitors which are greater than a given id which are having a particular remainder with a given
+     * Find a list of  monitors which are greater than a given id which are having a particular remainder with a given
      * number. This method assumes that ids are creating in ascending order.
      *
      * @param pageable    object containing a page number and page size so that from all the results which page should be
      *                    returned where page is obtained by dividing results into equal sets with the given size.
-     * @param lastId
-     * @param masterCount
-     * @param masterIndex
-     * @return
+     * @param lastId      id to which all results are greater than
+     * @param masterCount no of masters
+     * @param masterIndex index of the master
+     * @return list of all monitors
      */
-    @Query("select m from BaseMonitor m where m.id>:last_id and mod(m.id,:master_count)=:master_index " +
-            "and m.status = 'ACTIVE' order by m.id asc")
+    @Query("select m from BaseMonitor m where m.id>:last_id and mod(m.id,:master_count)=:master_index order by m.id asc")
     List<BaseMonitor> findWorkForMaster(Pageable pageable, @Param("last_id") long lastId,
                                         @Param("master_count") int masterCount,
                                         @Param("master_index") int masterIndex);
-
-    /**
-     * Find monitors with given status
-     *
-     * @param status status of the monitor
-     * @return list of monitors
-     */
-    List<BaseMonitor> findByStatus(BaseMonitor.Status status);
 }

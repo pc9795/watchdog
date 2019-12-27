@@ -41,8 +41,9 @@ public class ClusterNode extends AbstractActor {
 
     public ClusterNode(MonitorRepository monitorRepository, MonitorLogRepository monitorLogRepository,
                        int pollingInterval, int masterCount, int index, int workSize) {
-        this.master = getContext().actorOf(MasterActor.props(monitorRepository, monitorLogRepository, pollingInterval, masterCount,
-                index, workSize), "master");
+        this.master = getContext().actorOf(MasterActor.props(monitorRepository, monitorLogRepository, pollingInterval,
+                masterCount, index, workSize), "master");
+        this.master.tell(new MonitoringProtocol.FindWork(), master); //Seed master
         //Get the router actor from configuration
         //Have to create master router first as it will look for its routees immediately
         this.router = getContext().actorOf(FromConfig.getInstance().props(Props.empty()), "router");

@@ -1,35 +1,51 @@
 package service.monitoring.services;
 
+import akka.NotUsed;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import akka.http.javadsl.ConnectHttp;
+import akka.http.javadsl.Http;
+import akka.http.javadsl.model.HttpRequest;
+import akka.http.javadsl.model.HttpResponse;
+import akka.http.javadsl.server.Route;
 import akka.management.javadsl.AkkaManagement;
+import akka.stream.Materializer;
+import akka.stream.javadsl.Flow;
 import core.repostiories.cockroachdb.MonitorRepository;
 import core.repostiories.mongodb.MonitorLogRepository;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import service.monitoring.actors.ClusterListener;
-import service.monitoring.actors.MasterActor;
-import service.monitoring.protocols.MonitoringProtocol;
+import service.monitoring.actors.ClusterNode;
+import service.monitoring.routes.MonitoringRoutes;
+import service.monitoring.utils.Constants;
 
-import java.util.List;
+import java.time.Duration;
+
+import static akka.http.javadsl.server.Directives.concat;
 
 /**
  * Purpose: It will initialize the actor system
  **/
 @Component
 public class MonitoringInitializerComponent implements CommandLineRunner {
+    private static Logger LOGGER = LogManager.getLogger(MonitoringInitializerComponent.class);
     @Value("${workSize}")
     private int workSize; //The no of monitors to query at at time from database.
     @Value("${master_count}")
     private int masterCount;//Total no of masters
-    @Value("#{'${masters}'.split(',')}")
-    private List<Integer> masterList;//Masters which will be handled by this service
+    @Value("${index}")
+    private int index;// Index of the master handled by this node
     @Value("${polling_interval}")
     private int pollingInterval;//Time to wait before next hit to the database for monitors
-    private final MonitorRepository monitorRepository; //Access cockroachdb
-    private final MonitorLogRepository monitorLogRepository; //Access mongodb
+    private final MonitorRepository monitorRepository; //Access monitors
+    private final MonitorLogRepository monitorLogRepository; //Access monitor logs
+    @Value("${notify_message_url}")
+    private String notifyMessageURL;
 
     @Autowired
     public MonitoringInitializerComponent(MonitorRepository monitorRepository, MonitorLogRepository monitorLogRepository) {
@@ -44,17 +60,30 @@ public class MonitoringInitializerComponent implements CommandLineRunner {
      */
     @Override
     public void run(String... args) {
-        ActorSystem system = ActorSystem.create("monitoringActorSystem");
-        //Create the cluster listener actor
-        system.actorOf(ClusterListener.props(), "clusterListener");
-        AkkaManagement.get(system).start();
+        //Updating some run-time constants
+        Constants.notifyMessageURL = notifyMessageURL;
 
-        for (Integer parent : masterList) {
-            //Create master actor
-            ActorRef master = system.actorOf(MasterActor.props(monitorRepository, monitorLogRepository,
-                    pollingInterval, masterCount, parent, workSize), String.format("Master_Actor_%s", parent));
-            //Seed message for master
-            master.tell(new MonitoringProtocol.FindWork(), master);
-        }
+        ActorSystem system = ActorSystem.create("monitoringActorSystem");
+        system.actorOf(ClusterListener.props(), "clusterListener");//Create the cluster listener actor
+        //Create the node actor which represent a single entity in the cluster
+        ActorRef node = system.actorOf(ClusterNode.props(monitorRepository, monitorLogRepository, pollingInterval,
+                masterCount, index, workSize), "node");
+
+        //Get management routes from AkkaManagement module.
+        Route managementRoutes = AkkaManagement.get(system).getRoutes();
+
+        //Get the routes for notification
+        Duration askTimeout = system.settings().config().getDuration("akka.routes.ask-timeout");
+        MonitoringRoutes monitoringRoutes = new MonitoringRoutes(node, askTimeout);
+
+        //Setup http server
+        Http http = Http.get(system);
+        Materializer materializer = Materializer.createMaterializer(system);
+        Route allRoutes = concat(managementRoutes, monitoringRoutes.routes());
+        Flow<HttpRequest, HttpResponse, NotUsed> flow = allRoutes.flow(system, materializer);
+        String hostname = system.settings().config().getString("akka.management.http.hostname");
+        int port = system.settings().config().getInt("akka.management.http.port");
+        http.bindAndHandle(flow, ConnectHttp.toHost(hostname, port), materializer);
+        LOGGER.info(String.format("AKKA Http server is running at %s:%s...", hostname, port));
     }
 }

@@ -2,7 +2,6 @@ package service.notification.protocols;
 
 import akka.actor.ActorRef;
 import core.beans.EmailMessage;
-import core.beans.NotificationResult;
 
 /**
  * Purpose: Messages between actors in the system
@@ -38,15 +37,6 @@ public class NotificationProtocol {
      * Response of a notification action.
      */
     public static class NotifyResponse {
-        private final NotificationResult result;
-
-        public NotifyResponse(NotificationResult result) {
-            this.result = result;
-        }
-
-        public NotificationResult getResult() {
-            return result;
-        }
     }
 
 }

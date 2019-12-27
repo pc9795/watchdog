@@ -47,9 +47,10 @@ public class WorkerActor extends AbstractActor {
      */
     @Override
     public Receive createReceive() {
-        return receiveBuilder().match(MonitoringProtocol.StartWork.class, obj -> {
-            doWork();
-        }).build();
+        return receiveBuilder()
+                .match(MonitoringProtocol.StartWork.class, obj -> doWork())
+                .match(MonitoringProtocol.StatusWorkerRequest.class, obj -> status(obj.getId(), obj.getReplyTo()))
+                .build();
     }
 
     /**
@@ -87,5 +88,7 @@ public class WorkerActor extends AbstractActor {
                 getSelf().tell(new MonitoringProtocol.StartWork(), getSelf()), system.dispatcher());
     }
 
-
+    private void status(long id, ActorRef replyTo) {
+        replyTo.tell(new MonitoringProtocol.StatusWorkerResponse(id, this.monitor), getSelf());
+    }
 }

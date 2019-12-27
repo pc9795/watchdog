@@ -5,6 +5,8 @@ import akka.http.javadsl.ConnectHttp;
 import akka.http.javadsl.Http;
 import akka.http.javadsl.model.HttpRequest;
 import akka.http.javadsl.model.HttpResponse;
+import akka.http.javadsl.server.ExceptionHandler;
+import akka.http.javadsl.server.RejectionHandler;
 import akka.http.javadsl.server.Route;
 import akka.management.javadsl.AkkaManagement;
 import akka.stream.Materializer;
@@ -62,12 +64,12 @@ public class Main {
 
         //Get the routes for notification
         Duration askTimeout = system.settings().config().getDuration("akka.routes.ask-timeout");
-        Route notificationRoutes = new NotificationRoutes(node, askTimeout).routes();
+        NotificationRoutes notificationRoutes = new NotificationRoutes(node, askTimeout);
 
         //Setup http server
         Http http = Http.get(system);
         Materializer materializer = Materializer.createMaterializer(system);
-        Route allRoutes = concat(managementRoutes, notificationRoutes);
+        Route allRoutes = concat(managementRoutes, notificationRoutes.routes());
         Flow<HttpRequest, HttpResponse, NotUsed> flow = allRoutes.flow(system, materializer);
         String hostname = system.settings().config().getString("akka.management.http.hostname");
         int port = system.settings().config().getInt("akka.management.http.port");

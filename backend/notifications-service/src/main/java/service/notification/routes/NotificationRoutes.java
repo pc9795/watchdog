@@ -4,6 +4,7 @@ import akka.actor.ActorRef;
 import akka.http.javadsl.marshallers.jackson.Jackson;
 import akka.http.javadsl.model.StatusCodes;
 import akka.http.javadsl.server.AllDirectives;
+import akka.http.javadsl.server.ExceptionHandler;
 import akka.http.javadsl.server.Route;
 import core.beans.EmailMessage;
 import service.notification.protocols.NotificationProtocol;
@@ -43,14 +44,31 @@ public class NotificationRoutes extends AllDirectives {
      * @return route object
      */
     public Route routes() {
-        return post(
+        return handleExceptions(exceptionHandler(), () -> post(
                 () -> pathPrefix("notifications", () -> pathEndOrSingleSlash(
                         () -> entity(Jackson.unmarshaller(EmailMessage.class), msg -> {
                             CompletionStage<?> response = notify(msg);
                             return onSuccess(response, done ->
-                                    complete(StatusCodes.OK, done, Jackson.marshaller())
+                                    complete(StatusCodes.OK)
                             );
                         }))
-                ));
+                )));
+    }
+
+    /**
+     * Exception handler for the routes
+     *
+     * @return exception handler object
+     */
+    private ExceptionHandler exceptionHandler() {
+        return ExceptionHandler.newBuilder()
+                .match(Exception.class, obj -> {
+                    if (obj != null) {
+                        return complete(StatusCodes.INTERNAL_SERVER_ERROR,
+                                String.format("Something Bad Happened: %s - %s", obj.getClass(), obj.getMessage()));
+                    }
+                    return complete(StatusCodes.INTERNAL_SERVER_ERROR, "Something Bad Happened!");
+                })
+                .build();
     }
 }

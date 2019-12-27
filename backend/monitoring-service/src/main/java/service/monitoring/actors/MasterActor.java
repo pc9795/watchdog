@@ -1,9 +1,6 @@
 package service.monitoring.actors;
 
-import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
+import akka.actor.*;
 import core.entities.cockroachdb.BaseMonitor;
 import core.entities.mongodb.MonitorLog;
 import core.repostiories.cockroachdb.MonitorRepository;
@@ -23,8 +20,8 @@ import java.util.logging.Logger;
  **/
 public class MasterActor extends AbstractActor {
     private static Logger LOG = Logger.getLogger(MasterActor.class.toString()); //Logger object
-    private MonitorRepository monitorRepository;  //Access cockroachdb
-    private MonitorLogRepository monitorLogRepository; //Access mongodb
+    private MonitorRepository monitorRepository;  //Access monitors
+    private MonitorLogRepository monitorLogRepository; //Access monitor logs
     private int pollingInterval; //Interval at which master actor will check for work
     private Map<Long, ActorRef> monitorToActor; //Mapping of monitor id to the child actor to which work is assigned
     private int masterCount; //How many masters are working
@@ -51,14 +48,14 @@ public class MasterActor extends AbstractActor {
      * @param monitorLogRepository repostiory to access monitor logs
      * @param pollingInterval      interval between db requests
      * @param masterCount          no of master workers
-     * @param parent               index of this master
+     * @param index                index of this master
      * @param workSize             no of records to pull
      * @return configuration object
      */
     public static Props props(MonitorRepository monitorRepository, MonitorLogRepository monitorLogRepository,
-                              int pollingInterval, int masterCount, int parent, int workSize) {
+                              int pollingInterval, int masterCount, int index, int workSize) {
         return Props.create(MasterActor.class, monitorRepository, monitorLogRepository,
-                pollingInterval, masterCount, parent, workSize);
+                pollingInterval, masterCount, index, workSize);
     }
 
     /**
@@ -69,11 +66,15 @@ public class MasterActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder().
-                match(MonitoringProtocol.FindWork.class, (obj) -> findWork()).
-                match(MonitoringProtocol.AssignWork.class, (obj) -> assignWork(obj.getMonitors())).
-                match(MonitoringProtocol.Wait.class, (obj) -> waitForSomeTime()).
-                match(MonitoringProtocol.UpdateWork.class, (obj) -> updateLog(obj.getMonitorLog())).
-                match(MonitoringProtocol.DeleteWork.class, (obj) -> deleteWork()).
+                match(MonitoringProtocol.FindWork.class, obj -> findWork()).
+                match(MonitoringProtocol.AssignWork.class, obj -> assignWork(obj.getMonitors())).
+                match(MonitoringProtocol.Wait.class, obj -> waitForSomeTime()).
+                match(MonitoringProtocol.UpdateWork.class, obj -> updateLog(obj.getMonitorLog())).
+                match(MonitoringProtocol.EditMonitorRequest.class, obj -> editWork(obj.getId(), obj.getMonitor(),
+                        getSender())).
+                match(MonitoringProtocol.DeleteMonitorRequest.class, obj -> deleteWork(obj.getId(), getSender())).
+                match(MonitoringProtocol.StatusMasterRequest.class, obj -> status(getSender())).
+                match(MonitoringProtocol.StatusWorkerRequest.class, obj -> childStatus(obj.getId(), getSender())).
                 build();
     }
 
@@ -107,8 +108,6 @@ public class MasterActor extends AbstractActor {
             //Tell it to start work
             child.tell(new MonitoringProtocol.StartWork(), getSelf());
         }
-        //Message to self to check for deleted work
-        getSelf().tell(new MonitoringProtocol.DeleteWork(), getSelf());
     }
 
     /**
@@ -132,22 +131,30 @@ public class MasterActor extends AbstractActor {
         monitorLogRepository.save(monitorLog);
     }
 
-    /**
-     * Kill all children whose corresponding monitors are deleted.
-     */
-    private void deleteWork() {
-        List<BaseMonitor> monitorsToBeDeleted = monitorRepository.findByStatus(BaseMonitor.Status.TO_BE_STOPPED);
-        for (BaseMonitor monitor : monitorsToBeDeleted) {
-            //Check if the monitor is handled by this master.
-            if (monitorToActor.keySet().contains(monitor.getId())) {
-                getContext().stop(monitorToActor.get(monitor.getId()));
-            }
-            //We can choose to delete it straight-away but we are keeping it for the time-being.
-            monitor.setStatus(BaseMonitor.Status.STOPPED);
-            monitorRepository.save(monitor);
-        }
-        //Message to self to wait for some time
-        getSelf().tell(new MonitoringProtocol.Wait(), getSelf());
+    private void deleteWork(long id, ActorRef replyTo) {
+        //todo uncomment
+        //getContext().stop(monitorToActor.get(id));
+        replyTo.tell(new MonitoringProtocol.DeleteMonitorResponse(), getSelf());
     }
 
+    private void editWork(long id, BaseMonitor monitor, ActorRef replyTo) {
+        //todo uncomment
+        //getContext().stop(monitorToActor.get(id));
+        //ActorRef child = getContext().actorOf(WorkerActor.props(getSelf(), monitor));
+        //this.monitorToActor.put(monitor.getId(), child);
+        replyTo.tell(new MonitoringProtocol.EditMonitorResponse(), getSelf());
+    }
+
+    private void status(ActorRef replyTo) {
+        replyTo.tell(new MonitoringProtocol.StatusMasterResponse(this.index, this.monitorToActor.keySet()), getSelf());
+    }
+
+    private void childStatus(long id, ActorRef replyTo) {
+        if (!this.monitorToActor.containsKey(id)) {
+            replyTo.tell(new Status.Failure(new Exception(
+                    String.format("%s is not handled by master with index:%s", id, this.index))), getSelf());
+            return;
+        }
+        this.monitorToActor.get(id).tell(new MonitoringProtocol.StatusWorkerRequest(id, replyTo), getSelf());
+    }
 }

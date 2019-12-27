@@ -3,8 +3,8 @@ package service.notification.actors;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
+import akka.actor.Status;
 import core.beans.EmailMessage;
-import core.beans.NotificationResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import service.notification.protocols.NotificationProtocol;
@@ -47,11 +47,11 @@ public class WorkerActor extends AbstractActor {
         LOGGER.info(String.format("Handled by worker:%s", getSelf().toString()));
         try {
             Utils.sendEmail(message); //Send email
-            replyTo.tell(new NotificationProtocol.NotifyResponse(new NotificationResult()), getSelf()); //Success response
 
         } catch (Exception e) {
-            //Failure response
-            replyTo.tell(new NotificationProtocol.NotifyResponse(new NotificationResult(e.getMessage())), getSelf());
+            LOGGER.error(String.format("Error in sending email:%s", message), e);
+            replyTo.tell(new Status.Failure(e), getSelf());
         }
+        replyTo.tell(new NotificationProtocol.NotifyResponse(), getSelf());
     }
 }

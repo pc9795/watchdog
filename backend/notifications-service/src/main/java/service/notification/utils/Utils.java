@@ -4,7 +4,6 @@ import core.beans.EmailMessage;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
@@ -29,6 +28,7 @@ public final class Utils {
         messageObj.setSubject(String.format("%s - %s", Constants.emailSubject, message.getSubject()));
         messageObj.setText(message.getMessage());
 
-        Transport.send(messageObj);
+        //todo uncomment
+        //Transport.send(messageObj);
     }
 }

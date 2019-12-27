@@ -1,9 +1,11 @@
 package service.monitoring.protocols;
 
+import akka.actor.ActorRef;
 import core.entities.cockroachdb.BaseMonitor;
 import core.entities.mongodb.MonitorLog;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Purpose: Messaging protocol between master and actor
@@ -60,11 +62,104 @@ public class MonitoringProtocol {
         }
     }
 
-    /**
-     * Message for parent to delete work for deleted monitors.
-     */
-    public static class DeleteWork {
+    public static class EditMonitorRequest {
+        private long id;
+        private BaseMonitor monitor;
+
+        public EditMonitorRequest(long id, BaseMonitor monitor) {
+            this.id = id;
+            this.monitor = monitor;
+        }
+
+
+        public long getId() {
+            return id;
+        }
+
+        public BaseMonitor getMonitor() {
+            return monitor;
+        }
+    }
+
+
+    public static class EditMonitorResponse {
 
     }
 
+    public static class DeleteMonitorRequest {
+        private long id;
+
+        public DeleteMonitorRequest(long id) {
+            this.id = id;
+        }
+
+        public long getId() {
+            return id;
+        }
+    }
+
+    public static class DeleteMonitorResponse {
+
+    }
+
+    public static class StatusMasterRequest {
+    }
+
+    public static class StatusMasterResponse {
+        private int index;
+        private Set<Long> children;
+
+        public StatusMasterResponse(int index, Set<Long> children) {
+            this.index = index;
+            this.children = children;
+        }
+
+        public int getIndex() {
+            return index;
+        }
+
+        public Set<Long> getChildren() {
+            return children;
+        }
+    }
+
+    public static class StatusWorkerRequest {
+        private long id;
+        private ActorRef replyTo;
+
+        public StatusWorkerRequest(long id) {
+            this.id = id;
+        }
+
+        public StatusWorkerRequest(long id, ActorRef replyTo) {
+            this.id = id;
+            this.replyTo = replyTo;
+        }
+
+        public long getId() {
+            return id;
+        }
+
+        public ActorRef getReplyTo() {
+            return replyTo;
+        }
+    }
+
+    public static class StatusWorkerResponse {
+        private long id;
+        private BaseMonitor monitor;
+
+        public StatusWorkerResponse(long id, BaseMonitor monitor) {
+            this.id = id;
+            this.monitor = monitor;
+        }
+
+        public long getId() {
+            return id;
+        }
+
+        public BaseMonitor getMonitor() {
+            return monitor;
+        }
+    }
 }

@@ -1,0 +1,83 @@
+  version: '3.1'
+
+networks:
+  watchdog_net:
+
+services:
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
+    networks:
+      watchdog_net:
+        aliases:
+          - "mongodb"
+
+  cockroachdb:
+    image: cockroachdb/cockroach
+    command: start-single-node --insecure
+    ports:
+      - "26257:26257"
+      - "8080:8080"
+    networks:
+      watchdog_net:
+        aliases:
+          - "cockroach"
+
+  monitoring-service:
+    build: monitoring-service
+    networks:
+      watchdog_net:
+        aliases:
+          - "monitoring.service"
+    ports:
+      - "25520:25520"
+      - "8558:8558"
+    environment:
+        CLUSTER_HOSTNAME: monitoring.service
+        CLUSTER_PORT: 25520
+        CLUSTER_MANAGEMENT_PORT: 8558
+        CLUSTER_SEED_HOSTNAME: monitoring.service
+        CLUSTER_SEED_PORT: 25520
+        COCKROACH_DB_URL: jdbc:postgresql://192.168.99.100:26257/defaultdb
+        COCKROACH_DB_USERNAME: root
+        MONGO_DB_URL: mongodb://192.168.99.100:27017/local
+        MASTER_COUNT: 1
+        INDEX: 0
+        NOTIFY_MESSAGE_URL: http://notifications.service:8559/notifications/
+    depends_on:
+      - notifications-service
+      - cockroachdb
+      - mongo
+
+  client-service:
+    build: client-service
+    networks:
+      watchdog_net:
+        aliases:
+          - "client.service"
+    environment:
+      CORS_URL: http://frontend:4200
+      MONITORING_SERVICE_URL: localhost:8558/monitoring/workers/
+      COCKROACH_DB_URL: jdbc:postgresql://192.168.99.100:26257/defaultdb
+      COCKROACH_DB_USERNAME: root
+      MONGO_DB_URL: mongodb://192.168.99.100:27017/local
+      PORT: 8081
+    depends_on:
+      - monitoring-service
+
+  notifications-service:
+    build: notifications-service
+    networks:
+      watchdog_net:
+        aliases:
+          - "notifications.service"
+    ports:
+      - "25521:25521"
+      - "8559:8559"
+    environment:
+      CLUSTER_HOSTNAME: notifications.service
+      CLUSTER_PORT: 25521
+      CLUSTER_MANAGEMENT_PORT: 8559
+      CLUSTER_SEED_HOSTNAME: notifications.service
+      CLUSTER_SEED_PORT: 25521

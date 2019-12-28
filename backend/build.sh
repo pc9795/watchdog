@@ -50,4 +50,4 @@ do
 done
 
 # Using docker compose to create containers for all service.
-#docker-compose -p watchdog up --build
+docker-compose -p watchdog up --build

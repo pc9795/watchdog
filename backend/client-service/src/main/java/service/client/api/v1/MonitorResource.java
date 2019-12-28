@@ -15,7 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import service.client.exceptions.BadDataException;
 import service.client.exceptions.ForbiddenResourceException;
+import service.client.exceptions.MonitoringServiceException;
 import service.client.exceptions.ResourceNotFoundException;
+import service.client.service.MonitoringServiceClient;
 import service.client.utils.Constants;
 
 import javax.validation.Valid;
@@ -23,9 +25,9 @@ import java.security.Principal;
 import java.util.List;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 22-11-2019 00:33
  * Purpose: REST resource for accessing monitor.
+ * NOTE: we have not decided to put a status check on /GET/{id}, /PUT, and /DELETE as it causes no harm. There is no
+ * meaning to edit, access or try to delete an already stopped monitor.
  **/
 @RestController
 @RequestMapping(Constants.ApiV1Resource.MONITORS)
@@ -34,18 +36,20 @@ public class MonitorResource {
     private final MonitorRepository monitorRepository;
     private final UserRepository userRepository;
     private final MonitorLogRepository monitorLogRepository;
+    private final MonitoringServiceClient monitoringServiceClient;
 
     @Autowired
     public MonitorResource(MonitorRepository monitorRepository, UserRepository userRepository,
-                           MonitorLogRepository monitorLogRepository) {
+                           MonitorLogRepository monitorLogRepository, MonitoringServiceClient monitoringServiceClient) {
         this.monitorRepository = monitorRepository;
         this.userRepository = userRepository;
         this.monitorLogRepository = monitorLogRepository;
+        this.monitoringServiceClient = monitoringServiceClient;
     }
 
 
     /**
-     * Get all the monitors for a user.
+     * Get all the active monitors for a user.
      *
      * @param principal logged in user
      * @return list of monitors
@@ -82,10 +86,8 @@ public class MonitorResource {
     @ResponseStatus(HttpStatus.CREATED)
     public BaseMonitor createMonitor(@Valid @RequestBody BaseMonitor monitor, Principal principal) {
         User user = userRepository.findUserByUsername(principal.getName());
-        //Maintaining foreign key constraint
-        monitor.setUser(user);
-        //Save
-        return monitorRepository.save(monitor);
+        monitor.setUser(user); //Maintaining foreign key constraint
+        return monitorRepository.save(monitor); //Save
     }
 
     /**
@@ -120,6 +122,9 @@ public class MonitorResource {
         } else if (monitor instanceof SocketMonitor) {
             ((SocketMonitor) dbMonitor).setSocketPort(((SocketMonitor) monitor).getSocketPort());
         }
+        if (!monitoringServiceClient.editMonitor(monitorId, dbMonitor)) {
+            throw new MonitoringServiceException("Could not able to edit the monitor right now!");
+        }
         //Save
         return monitorRepository.save(dbMonitor);
     }
@@ -136,6 +141,9 @@ public class MonitorResource {
     public void deleteAUsersMonitor(@PathVariable("monitor_id") long monitorId, Principal principal)
             throws ResourceNotFoundException, ForbiddenResourceException {
         BaseMonitor dbMonitor = getUsersMonitor(monitorId, principal.getName());
+        if (!monitoringServiceClient.deleteMonitor(monitorId)) {
+            throw new MonitoringServiceException("Could not able to delete the monitor right now!");
+        }
         //Delete
         monitorRepository.delete(dbMonitor);
     }
@@ -145,7 +153,7 @@ public class MonitorResource {
      *
      * @param monitorId db id of the monitor.
      * @param principal logged in user
-     * @return latest log entry of the monitor.
+     * @return latest log entry of the monitor. It can also return null if monitoring is not started.
      */
     @GetMapping("/{monitor_id}/status")
     public MonitorLog getMonitorStatus(@PathVariable("monitor_id") long monitorId, Principal principal) {

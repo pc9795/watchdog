@@ -20,7 +20,7 @@ import java.util.Map;
 
 
 /**
- * For custom implementation of common errors.
+ * Purpose: For custom implementation of common errors.
  */
 @ControllerAdvice
 public class ExceptionController {
@@ -107,5 +107,4 @@ public class ExceptionController {
         Utils.createJSONErrorResponse(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                 Constants.ErrorMsg.INTERNAL_SERVER_ERROR, response);
     }
-
 }

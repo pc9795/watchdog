@@ -5,8 +5,6 @@ import org.springframework.data.annotation.Id;
 import java.time.LocalDateTime;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 06-12-2019 22:32
  * Purpose: Monitor logs
  **/
 public class MonitorLog {

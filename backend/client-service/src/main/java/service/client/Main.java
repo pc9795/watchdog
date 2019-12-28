@@ -3,11 +3,13 @@ package service.client;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.web.client.RestTemplate;
 import service.client.utils.Constants;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -16,8 +18,6 @@ import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 22-11-2019 00:32
  * Purpose: Entry point of the application
  **/
 @EnableWebSecurity //Enable spring security
@@ -49,5 +49,16 @@ public class Main {
                 .apis(RequestHandlerSelectors.basePackage(Constants.WATCHDOG_BASE_PACKAGE))
                 .paths(PathSelectors.any())
                 .build();
+    }
+
+    /**
+     * Rest client to access other services.
+     *
+     * @param builder configuration object
+     * @return rest template object
+     */
+    @Bean
+    public RestTemplate restTemplate(RestTemplateBuilder builder) {
+        return builder.build();
     }
 }

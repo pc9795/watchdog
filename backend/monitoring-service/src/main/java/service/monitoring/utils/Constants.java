@@ -1,8 +1,6 @@
 package service.monitoring.utils;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 07-12-2019 04:25
  * Purpose: Constants for the project
  **/
 public final class Constants {
@@ -11,4 +9,7 @@ public final class Constants {
     }
 
     public static final int PING_TIMEOUT = 3000;
+
+    //Not final as configured by properties file.
+    public static String notifyMessageURL;
 }

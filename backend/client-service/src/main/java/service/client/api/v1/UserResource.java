@@ -1,20 +1,18 @@
 package service.client.api.v1;
 
+import core.entities.cockroachdb.User;
+import core.repostiories.cockroachdb.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import core.entities.cockroachdb.User;
 import service.client.exceptions.ResourceNotFoundException;
 import service.client.exceptions.UserAlreadyExistException;
-import core.repostiories.cockroachdb.UserRepository;
 import service.client.utils.Constants;
 
 import javax.validation.Valid;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 22-11-2019 00:32
  * Purpose: REST resource for accessing User.
  **/
 @RestController

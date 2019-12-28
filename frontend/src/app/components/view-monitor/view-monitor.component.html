@@ -1,10 +1,13 @@
 <div class="container">
+
   <div class="row mt-5">
     <div class="col-6">
       <h3 class="text-secondary text-capitalize">Monitor details</h3>
     </div>
   </div>
+
   <div class="row mt-3">
+    <!--Form to edit a monitor-->
     <form class="col-4" (ngSubmit)="onSubmit()" [formGroup]="viewMonitorForm">
 
       <select class="form-control" formControlName="type" #monitorType>
@@ -14,6 +17,7 @@
 
       <input type="text" placeholder="Name" class="form-control mt-2" formControlName="name"
              [ngClass]="{ 'is-invalid': submitted && f.name.errors }" required>
+      <!--Error pop up-->
       <div *ngIf="submitted && f.name.errors" class="invalid-feedback">
         <div *ngIf="f.name.errors.required">Name is required</div>
         <div *ngIf="f.name.errors.minlength">Name should be greater than
@@ -26,6 +30,7 @@
 
       <input type="text" placeholder="IP or Hostname" class="form-control mt-2" formControlName="ipOrHost"
              [ngClass]="{ 'is-invalid': submitted && f.ipOrHost.errors }" required>
+      <!--Error pop up-->
       <div *ngIf="submitted && f.ipOrHost.errors" class="invalid-feedback">
         <div *ngIf="f.ipOrHost.errors.required">IP or Hostname is required</div>
         <div *ngIf="f.ipOrHost.errors.minlength">IP or Hostname should be greater than
@@ -35,8 +40,9 @@
           {{f.ipOrHost.errors.maxlength.requiredLength}} characters
         </div>
       </div>
+
       <div class="input-group mt-2">
-        <input id="monitoringInterval" type="range" class="custom-range" min="5" max="144"
+        <input id="monitoringInterval" type="range" class="custom-range" [min]="minRange" [max]="maxRange"
                formControlName="monitoringInterval" #monitoringInterval>
         <div class="input-group-append">
           <span class="ml-1">{{rangeToMonitoringIntervalInText(monitoringInterval.value)}}</span>
@@ -44,13 +50,18 @@
       </div>
       <input type="number" class="form-control" placeholder="Expected Status code" formControlName="expectedStatusCode"
              [hidden]="!isHTTPMonitor(monitorType.value)">
+
       <input type="number" placeholder="Socket Port" class="form-control" formControlName="socketPort"
              [hidden]="!isSocketMonitor(monitorType.value)">
 
       <button [disabled]="loading" class="btn btn-info form-control mt-2">Save<i class="ml-1 fa fa-save"></i></button>
+
     </form>
-    <div class="col-4">
+
+    <div class="col-8">
+      <!--Table containing recent logs-->
       <table class="table table-hover table-sm">
+
         <thead>
         <tr>
           <th scope="col">Status</th>
@@ -58,6 +69,7 @@
           <th scope="col">Creation time</th>
         </tr>
         </thead>
+
         <tbody>
         <tr *ngFor="let monitorLog of monitorLogs">
           <td scope="row" *ngIf="monitorLog.status"><i style="color:green" class="fa fa-check"></i></td>
@@ -66,6 +78,7 @@
           <td>{{monitorLog.creationTime}}</td>
         </tr>
         </tbody>
+
       </table>
     </div>
   </div>

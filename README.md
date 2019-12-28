@@ -10,12 +10,11 @@ such a tool.
 ![High level design](hld.png)
 
 **Tech Used**
-* React
+* Angular
 * Spring boot
 * Redis
 * MongoDB
 * CockroachDB
-* ActiveMQ
 * Docker
 * Maven
 * Nginx

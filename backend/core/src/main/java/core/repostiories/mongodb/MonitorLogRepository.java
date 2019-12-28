@@ -7,8 +7,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 06-12-2019 22:33
  * Purpose: Repository for monitor logs.
  **/
 public interface MonitorLogRepository extends MongoRepository<MonitorLog, String> {

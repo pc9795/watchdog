@@ -9,8 +9,6 @@ import java.net.Socket;
 import java.net.URL;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 06-12-2019 00:05
  * Purpose: Utility methods for module
  **/
 public final class Utils {

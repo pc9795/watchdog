@@ -1,3 +1,6 @@
+/**
+ * Class representing monitors
+ */
 export class Monitor {
   constructor(
     public id: number, public name: string, public ipOrHost: string, public monitoringInterval: number, public type: MonitorType,
@@ -6,6 +9,9 @@ export class Monitor {
   }
 }
 
+/**
+ * Enum representing monitor types
+ */
 export enum MonitorType {
   PING_MONITOR = 'PingMonitor',
   HTTP_MONITOR = 'HttpMonitor',

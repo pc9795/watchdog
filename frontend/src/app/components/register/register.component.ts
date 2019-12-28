@@ -16,18 +16,23 @@ import {HttpErrorResponse} from '@angular/common/http';
 })
 export class RegisterComponent implements OnInit {
   registerForm: FormGroup; // Form object
-  submitted = false;
-  loading = false;
+  submitted = false; // Signifies form is submitted
+  loading = false; // Signifies form is loading
 
   constructor(private formBuilder: FormBuilder, private userService: UsersService, private router: Router,
               private alertService: AlertService) {
   }
 
-  // getter for easy access to form fields
+  /**
+   * getter for easy access to form fields
+   */
   get f() {
     return this.registerForm.controls;
   }
 
+  /**
+   * Initialization hook
+   */
   ngOnInit() {
     // Initialize the form
     this.registerForm = this.formBuilder.group({
@@ -38,28 +43,34 @@ export class RegisterComponent implements OnInit {
     });
   }
 
-  // Submit a user registration
+  /**
+   * Action on user submitting the form
+   */
   onSubmit() {
     this.submitted = true;
-    // confirm passwords
+    // Confirm passwords
     if (this.registerForm.get('password').value !== this.registerForm.get('passwordConfirm').value) {
       this.registerForm.get('passwordConfirm').setErrors({notmatch: 'Passwords don\'t match'})
       return;
     }
-
+    // Invalid form
     if (this.registerForm.invalid) {
       return;
     }
 
-    // Submit details to server.
     this.loading = true;
+    // Get user details from the form.
     const user = new User(-1, this.registerForm.get('username').value, this.registerForm.get('email').value,
       this.registerForm.get('passwordConfirm').value);
+    // Submit details to server.
     this.userService.register(user).subscribe(
+      // Success
       data => {
         this.alertService.success('Registration successful! Please Log in to continue', true);
         this.router.navigate(['/']);
-      }, (error: HttpErrorResponse) => {
+      },
+      // Error
+      (error: HttpErrorResponse) => {
         this.alertService.error(error);
       }
     );

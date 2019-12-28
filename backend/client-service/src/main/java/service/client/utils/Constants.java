@@ -1,8 +1,6 @@
 package service.client.utils;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 22-11-2019 00:46
  * Purpose: Constants for the project
  **/
 public final class Constants {

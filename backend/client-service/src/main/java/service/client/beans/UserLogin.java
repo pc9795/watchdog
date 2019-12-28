@@ -3,8 +3,6 @@ package service.client.beans;
 import javax.validation.constraints.NotNull;
 
 /**
- * Created By: Prashant Chaubey
- * Created On: 30-11-2019 17:16
  * Purpose: Class representing the login information
  **/
 public class UserLogin {

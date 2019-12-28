@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Locally run the project without docker. This script assumes that all the projects are in the same directory as this
 # script is.
-# NOTE: THIS SCRIPT ASSUMES THAT COCKRAOCHDB AND MONGODB ARE RUNNING
+# NOTE: THIS SCRIPT ASSUMES THAT COCKROACH-DB AND MONGO-DB ARE RUNNING
 
 # Method to check a command worked or not.
 check_error(){
@@ -42,7 +42,7 @@ do
     cd ..
 done
 
-declare -a dirs=("client-service" "monitoring-service")
+declare -a dirs=("client-service/" "monitoring-service/")
 # Build and run SPRING services.
 for i in "${dirs[@]}"
 do

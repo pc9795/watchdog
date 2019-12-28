@@ -15,23 +15,39 @@ check_error(){
     fi
 }
 
-# Installing core
+# Building front-end code
+echo ">>>Building front-end code"
+cd ../frontend/
+ng build --prod
+check_error "Not able to build front end code"
+mkdir -p ../backend/client-service/src/main/resources/static
+check_error "Not able to create a static directory in client-service"
+# It is assumed that name of the angular project is not changed from front end.
+mv -v ./dist/frontend/* ../backend/client-service/src/main/resources/static/
+check_error "Not able to move built artifacts to client-service"
+cd ../backend/
+
+# Build parent POM; -N means that it will not recurse into child projects
+echo ">>>Installing parent project"
+mvn -N install
+
+# Installing core in local repo.
+echo ">>>Installing core package"
 cd core/
 mvn clean compile install
 check_error "Core project doesn't installed successfully"
 cd ..
 
-declare -a dirs=("auldfellas/" "dodgydrivers/" "girlpower/" "broker/")
-
+declare -a dirs=("notifications-service/" "monitoring-service/" "client-service/")
 # Building and packaging all services into jars.
 for i in "${dirs[@]}"
 do
     echo ">>>Building project: $i"
     cd $i
-    mvn clean compile package
+    mvn -P prod clean compile package -DskipTests
     check_error $i." project not packaged successfully"
     cd ../
 done
 
 # Using docker compose to create containers for all service.
-docker-compose -p quoco up --build
+#docker-compose -p watchdog up --build

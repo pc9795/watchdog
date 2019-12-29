@@ -52,3 +52,6 @@ Thumbs.db
 
 # Spring related
 static/
+
+# Deployment related
+backend.7z

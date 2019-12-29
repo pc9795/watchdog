@@ -8,13 +8,11 @@ Name|Description|port
 Mongo db|Mongo db database service|27017
 Cockroach db|Cockroach db database service|26257
 -|Cockroach db management dashboard|8080
-Redis|Redis key store service|6379
 Monitoring service|Akka cluster exposed via Akka HTTP|8558
 -|Akka cluster remoting|25520
 Notifications service|Akka cluster exposed via Akka HTTP|8559
 -|Akka cluster remoting|25521
 Client service|Spring rest service with spring security|8081
-Front-end service|Angular application|4200
 
 **Client service**
 
@@ -52,4 +50,3 @@ Path|HTTP method|Required form fields|Description
 /monitoring/workers/{monitor_id}|DELETE|None|Delete the worker actor with the given monitor
 /monitoring/workers/|GET|None|All the workers assigned to particular node
 /monitoring/workers/{monitor_id}|GET|None|Get the worker assigned to particular monitor
-

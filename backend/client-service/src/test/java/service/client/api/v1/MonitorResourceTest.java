@@ -1,5 +1,9 @@
 package service.client.api.v1;
 
+import core.entities.cockroachdb.BaseMonitor;
+import core.entities.cockroachdb.User;
+import core.repostiories.cockroachdb.MonitorRepository;
+import core.repostiories.cockroachdb.UserRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
@@ -11,27 +15,20 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import service.client.entities.User;
-import service.client.repositories.MonitorRepository;
-import service.client.repositories.UserRepository;
 import service.client.service.ApiUserDetailsService;
 import service.client.utils.Constants;
-import service.client.entities.BaseMonitor;
 
 import javax.sql.DataSource;
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.List;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Tests the methods and exceptions used by the MonitorResource endpoint
+ *
  * @author Oisín Whelan 15558517
  */
 
@@ -66,7 +63,7 @@ public class MonitorResourceTest {
     private BaseMonitor monitor;
 
     @Test
-    public void testGetAllMonitors() throws Exception{
+    public void testGetAllMonitors() throws Exception {
         ArrayList<BaseMonitor> list = new ArrayList<>();
         list.add(new BaseMonitor());
         BDDMockito.given(userRepository.findUserByUsername("user"))
@@ -80,9 +77,9 @@ public class MonitorResourceTest {
     }
 
     @Test
-    public void testGetMonitorDoesntExist() throws Exception{
+    public void testGetMonitorDoesntExist() throws Exception {
         BDDMockito.given(monitorRepository.findById(1L))
-            .willReturn(null);
+                .willReturn(null);
         BDDMockito.given(userRepository.findUserByUsername("user"))
                 .willReturn(user);
         BDDMockito.when(principal.getName()).thenReturn("user");
@@ -93,7 +90,7 @@ public class MonitorResourceTest {
     }
 
     @Test
-    public void testGetMonitorNotAuthorised() throws Exception{
+    public void testGetMonitorNotAuthorised() throws Exception {
         BDDMockito.given(monitorRepository.findById(1L))
                 .willReturn(monitor);
         BDDMockito.given(userRepository.findUserByUsername("user"))
@@ -108,7 +105,7 @@ public class MonitorResourceTest {
     }
 
     @Test
-    public void testGetMonitorById() throws Exception{
+    public void testGetMonitorById() throws Exception {
         BDDMockito.given(userRepository.findUserByUsername("user"))
                 .willReturn(user);
         BDDMockito.when(principal.getName()).thenReturn("user");
@@ -123,20 +120,20 @@ public class MonitorResourceTest {
     }
 
     @Test
-    public void testCreateMonitor() throws Exception{
+    public void testCreateMonitor() throws Exception {
         BDDMockito.given(userRepository.findUserByUsername("user"))
                 .willReturn(user);
         BDDMockito.when(principal.getName()).thenReturn("user");
 
         mvc.perform(post("")
-            .param("id", "1")
-            .param("ipOrHost", "ip")
-            .param("monitoringInterval", "500"))
+                .param("id", "1")
+                .param("ipOrHost", "ip")
+                .param("monitoringInterval", "500"))
                 .andExpect(status().isCreated());
     }
 
     @Test
-    public void testCreateMonitorLowMonitoringInterval() throws Exception{
+    public void testCreateMonitorLowMonitoringInterval() throws Exception {
         BDDMockito.given(userRepository.findUserByUsername("user"))
                 .willReturn(user);
         BDDMockito.when(principal.getName()).thenReturn("user");
@@ -150,7 +147,7 @@ public class MonitorResourceTest {
     }
 
     @Test
-    public void testUpdateMonitorLowMonitoringInterval() throws Exception{
+    public void testUpdateMonitorLowMonitoringInterval() throws Exception {
         BDDMockito.given(userRepository.findUserByUsername("user"))
                 .willReturn(user);
         BDDMockito.when(principal.getName()).thenReturn("user");
@@ -169,7 +166,7 @@ public class MonitorResourceTest {
     }
 
     @Test
-    public void testUpdateMonitorNoMonitorFound() throws Exception{
+    public void testUpdateMonitorNoMonitorFound() throws Exception {
         BDDMockito.given(userRepository.findUserByUsername("user"))
                 .willReturn(user);
         BDDMockito.when(principal.getName()).thenReturn("user");
@@ -185,7 +182,7 @@ public class MonitorResourceTest {
     }
 
     @Test
-    public void testUpdateMonitorNotAuthorised() throws Exception{
+    public void testUpdateMonitorNotAuthorised() throws Exception {
         BDDMockito.given(userRepository.findUserByUsername("user"))
                 .willReturn(user);
         BDDMockito.when(principal.getName()).thenReturn("user");
@@ -203,7 +200,7 @@ public class MonitorResourceTest {
     }
 
     @Test
-    public void testUpdateMonitor() throws Exception{
+    public void testUpdateMonitor() throws Exception {
         BDDMockito.given(userRepository.findUserByUsername("user"))
                 .willReturn(user);
         BDDMockito.when(principal.getName()).thenReturn("user");
@@ -221,7 +218,7 @@ public class MonitorResourceTest {
     }
 
     @Test
-    public void testDeleteMonitorNotFound() throws Exception{
+    public void testDeleteMonitorNotFound() throws Exception {
         BDDMockito.given(userRepository.findUserByUsername("user"))
                 .willReturn(user);
         BDDMockito.when(principal.getName()).thenReturn("user");
@@ -234,7 +231,7 @@ public class MonitorResourceTest {
     }
 
     @Test
-    public void testDeleteMonitorNotAuthorised() throws Exception{
+    public void testDeleteMonitorNotAuthorised() throws Exception {
         BDDMockito.given(userRepository.findUserByUsername("user"))
                 .willReturn(user);
         BDDMockito.when(principal.getName()).thenReturn("user");

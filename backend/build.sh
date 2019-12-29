@@ -20,6 +20,12 @@ echo ">>>Building front-end code"
 cd ../frontend/
 ng build --prod
 check_error "Not able to build front end code"
+if [[ -d "../backend/client-service/src/main/resources/static" ]]
+then
+    echo ">>>Static directory exists; Deleting..."
+    rm -r ../backend/client-service/src/main/resources/static
+    check_error "Not able to delete already existing static directory"
+fi
 mkdir -p ../backend/client-service/src/main/resources/static
 check_error "Not able to create a static directory in client-service"
 # It is assumed that name of the angular project is not changed from front end.

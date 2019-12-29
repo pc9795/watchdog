@@ -1,7 +1,9 @@
 package service.client.api.v1;
 
-import org.junit.Test;
+import core.entities.cockroachdb.User;
+import core.repostiories.cockroachdb.UserRepository;
 import org.junit.Assert;
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -9,8 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import service.client.entities.User;
-import service.client.repositories.UserRepository;
+import service.client.controllers.AuthController;
 import service.client.service.ApiUserDetailsService;
 import service.client.utils.Constants;
 
@@ -20,6 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Tests user registering and login through the API and Repository layers
+ *
  * @author Oisín Whelan 15558517
  */
 
@@ -42,7 +44,7 @@ public class UserAuthIntegrationTest {
     private PasswordEncoder passwordEncoder;
 
     @Test
-    public void testRegistrationAllLayers() throws Exception{
+    public void testRegistrationAllLayers() throws Exception {
         User testUser = new User("user", "pass");
         int size = userRepository.findAll().size();
 
@@ -60,7 +62,7 @@ public class UserAuthIntegrationTest {
     }
 
     @Test
-    public void testRegistrationUserAlreadyExistsAllLayers() throws Exception{
+    public void testRegistrationUserAlreadyExistsAllLayers() throws Exception {
         User testUser = new User("user", "pass");
 
         mvc.perform(post("/register")

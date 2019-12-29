@@ -1,28 +1,31 @@
-  version: '3.1'
+version: '3.1'
 
 networks:
   watchdog_net:
 
 services:
-  mongo:
-    image: mongo
-    ports:
-      - "27017:27017"
-    networks:
-      watchdog_net:
-        aliases:
-          - "mongodb"
+# Write now commenting out mongo and cockroachdb as these services are running locally so no need to recreate them.
+# Will be uncommented in future.
 
-  cockroachdb:
-    image: cockroachdb/cockroach
-    command: start-single-node --insecure
-    ports:
-      - "26257:26257"
-      - "8080:8080"
-    networks:
-      watchdog_net:
-        aliases:
-          - "cockroach"
+#  mongo:
+#    image: mongo
+#    ports:
+#      - "27017:27017"
+#    networks:
+#      watchdog_net:
+#        aliases:
+#          - "mongodb"
+#
+#  cockroachdb:
+#    image: cockroachdb/cockroach
+#    command: start-single-node --insecure
+#    ports:
+#      - "26257:26257"
+#      - "8080:8080"
+#    networks:
+#      watchdog_net:
+#        aliases:
+#          - "cockroach"
 
   monitoring-service:
     build: monitoring-service
@@ -47,8 +50,8 @@ services:
         NOTIFY_MESSAGE_URL: http://notifications.service:8559/notifications/
     depends_on:
       - notifications-service
-      - cockroachdb
-      - mongo
+#      - cockroachdb
+#      - mongo
 
   client-service:
     build: client-service
@@ -57,7 +60,6 @@ services:
         aliases:
           - "client.service"
     environment:
-      CORS_URL: http://frontend:4200
       MONITORING_SERVICE_URL: localhost:8558/monitoring/workers/
       COCKROACH_DB_URL: jdbc:postgresql://192.168.99.100:26257/defaultdb
       COCKROACH_DB_USERNAME: root

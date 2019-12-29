@@ -12,9 +12,7 @@ such a tool.
 **Tech Used**
 * Angular
 * Spring boot
-* Redis
 * MongoDB
 * CockroachDB
 * Docker
 * Maven
-* Nginx

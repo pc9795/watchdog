@@ -1,5 +1,9 @@
 package service.client.api.v1;
 
+import core.entities.cockroachdb.BaseMonitor;
+import core.entities.cockroachdb.User;
+import core.repostiories.cockroachdb.MonitorRepository;
+import core.repostiories.cockroachdb.UserRepository;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.BDDMockito;
@@ -7,25 +11,16 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import service.client.entities.User;
-import service.client.repositories.MonitorRepository;
-import service.client.repositories.UserRepository;
 import service.client.service.ApiUserDetailsService;
 import service.client.utils.Constants;
-import service.client.entities.BaseMonitor;
 
 import java.security.Principal;
-import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 

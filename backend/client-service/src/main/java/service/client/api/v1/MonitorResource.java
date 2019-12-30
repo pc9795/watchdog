@@ -8,6 +8,8 @@ import core.entities.mongodb.MonitorLog;
 import core.repostiories.cockroachdb.MonitorRepository;
 import core.repostiories.cockroachdb.UserRepository;
 import core.repostiories.mongodb.MonitorLogRepository;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,8 @@ import java.util.List;
  **/
 @RestController
 @RequestMapping(Constants.ApiV1Resource.MONITORS)
+@Api(value = "Monitor resource", description = "Operations pertaining to manipulate monitors in Watchdog. Requests " +
+        "should have a valid session cookie.")
 public class MonitorResource {
     private static Logger LOGGER = LoggerFactory.getLogger(MonitorResource.class);
     private final MonitorRepository monitorRepository;
@@ -55,6 +59,7 @@ public class MonitorResource {
      * @return list of monitors
      */
     @GetMapping()
+    @ApiOperation(value = "Get all monitors for the authenticated user")
     public List<BaseMonitor> getAllMonitors(Principal principal) {
         User user = userRepository.findUserByUsername(principal.getName());
         return monitorRepository.findAllByUser(user);
@@ -70,6 +75,7 @@ public class MonitorResource {
      * @throws ForbiddenResourceException request for a monitor not created by the logged in user.
      */
     @GetMapping("/{monitor_id}")
+    @ApiOperation(value = "Get the monitor with given database id if created by authenticated user")
     public BaseMonitor getMonitor(@PathVariable("monitor_id") long monitorId, Principal principal)
             throws ResourceNotFoundException, ForbiddenResourceException {
         return getUsersMonitor(monitorId, principal.getName());
@@ -84,6 +90,7 @@ public class MonitorResource {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @ApiOperation(value = "Create a monitor")
     public BaseMonitor createMonitor(@Valid @RequestBody BaseMonitor monitor, Principal principal) {
         User user = userRepository.findUserByUsername(principal.getName());
         monitor.setUser(user); //Maintaining foreign key constraint
@@ -103,6 +110,7 @@ public class MonitorResource {
      *                                    edit a SocketMonitor object.
      */
     @PutMapping("/{monitor_id}")
+    @ApiOperation(value = "Update a monitor with give database id if created by authenticated user")
     public BaseMonitor updateMonitor(@PathVariable("monitor_id") long monitorId, @Valid @RequestBody BaseMonitor monitor,
                                      Principal principal) throws ResourceNotFoundException, ForbiddenResourceException,
             BadDataException {
@@ -139,6 +147,7 @@ public class MonitorResource {
      * @throws ForbiddenResourceException When the given monitor is not created by the logged in user.
      */
     @DeleteMapping("/{monitor_id}")
+    @ApiOperation(value = "Delete the monitor with given database id if created by authenticated user")
     public void deleteAUsersMonitor(@PathVariable("monitor_id") long monitorId, Principal principal)
             throws ResourceNotFoundException, ForbiddenResourceException {
         BaseMonitor dbMonitor = getUsersMonitor(monitorId, principal.getName());
@@ -147,7 +156,7 @@ public class MonitorResource {
             throw new MonitoringServiceException("Could not able to delete the monitor right now!");
         }
         //Delete
-//        monitorRepository.delete(dbMonitor);
+        monitorRepository.delete(dbMonitor);
     }
 
     /**
@@ -158,6 +167,7 @@ public class MonitorResource {
      * @return latest log entry of the monitor. It can also return null if monitoring is not started.
      */
     @GetMapping("/{monitor_id}/status")
+    @ApiOperation(value = "Status of the monitor with give monitor id. If monitor id is not valid then returns null")
     public MonitorLog getMonitorStatus(@PathVariable("monitor_id") long monitorId, Principal principal) {
         return monitorLogRepository.findTopByMonitorIdAndUsernameOrderByCreationTimeDesc(monitorId,
                 principal.getName());
@@ -171,6 +181,7 @@ public class MonitorResource {
      * @return latest logs for the monitor.
      */
     @GetMapping("/{monitor_id}/logs")
+    @ApiOperation(value = "Logs of the monitor with given monitor id. If monitor id is not valid then returns null")
     public List<MonitorLog> getMonitorLogs(@PathVariable("monitor_id") long monitorId, Principal principal) {
         Pageable pageable = PageRequest.of(0, Constants.MAXIMUM_MONITORING_LOGS);
         return monitorLogRepository.findByMonitorIdAndUsernameOrderByCreationTimeDesc(pageable, monitorId,

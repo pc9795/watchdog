@@ -2,6 +2,8 @@ package service.client.api.v1;
 
 import core.entities.cockroachdb.User;
 import core.repostiories.cockroachdb.UserRepository;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,6 +19,7 @@ import javax.validation.Valid;
  **/
 @RestController
 @RequestMapping(Constants.ApiV1Resource.USER)
+@Api(value = "User resource", description = "Operations pertaining to manipulate users in Watchdog")
 public class UserResource {
 
     private final UserRepository userRepository;
@@ -37,6 +40,7 @@ public class UserResource {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @ApiOperation(value = "Add an user")
     public User addUser(@Valid @RequestBody User user) throws UserAlreadyExistException {
         if (userRepository.findUserByUsername(user.getUsername()) != null) {
             throw new UserAlreadyExistException(String.format(Constants.ErrorMsg.USER_ALREADY_EXIST,
@@ -55,6 +59,7 @@ public class UserResource {
      * @throws ResourceNotFoundException if user with given id doesn't exist in database.
      */
     @GetMapping("/{user_id}")
+    @ApiOperation(value = "Get an user by its database id")
     public User getUserById(@PathVariable("user_id") long userId) throws ResourceNotFoundException {
         User user = userRepository.findById(userId);
         if (user == null) {

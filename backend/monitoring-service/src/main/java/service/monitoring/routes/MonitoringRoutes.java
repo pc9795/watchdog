@@ -2,11 +2,13 @@ package service.monitoring.routes;
 
 import akka.actor.ActorRef;
 import akka.http.javadsl.marshallers.jackson.Jackson;
+import akka.http.javadsl.model.StatusCode;
 import akka.http.javadsl.model.StatusCodes;
 import akka.http.javadsl.server.AllDirectives;
 import akka.http.javadsl.server.ExceptionHandler;
 import akka.http.javadsl.server.Route;
 import core.entities.cockroachdb.BaseMonitor;
+import service.monitoring.exceptions.BadDataException;
 import service.monitoring.exceptions.ResourceNotFoundException;
 import service.monitoring.protocols.MonitoringProtocol;
 
@@ -84,7 +86,7 @@ public class MonitoringRoutes extends AllDirectives {
                 () -> concat(
 
                         put(() -> path(segment("monitoring").slash(
-                                segment("workers").slash(segment(compile("\\d+")).slash())),
+                                segment("workers").slash(segment(compile("\\d+")))),
                                 (idStr) -> entity(Jackson.unmarshaller(BaseMonitor.class), monitor -> {
                                     CompletionStage<?> response = editMonitor(Long.parseLong(idStr), monitor);
                                     return onSuccess(response,
@@ -92,7 +94,7 @@ public class MonitoringRoutes extends AllDirectives {
                                 }))),
 
                         delete(() -> path(segment("monitoring").slash(
-                                segment("workers").slash(segment(compile("\\d+")).slash())),
+                                segment("workers").slash(segment(compile("\\d+")))),
                                 (idStr) -> {
                                     CompletionStage<?> response = deleteMonitor(Long.parseLong(idStr));
                                     return onSuccess(response, done -> complete(StatusCodes.OK));
@@ -104,7 +106,7 @@ public class MonitoringRoutes extends AllDirectives {
                         })),
 
                         get(() -> path(segment("monitoring").slash(
-                                segment("workers").slash(segment(compile("\\d+")).slash())),
+                                segment("workers").slash(segment(compile("\\d+")))),
                                 (idStr) -> {
                                     CompletionStage<?> response = workerStatus(Long.parseLong(idStr));
                                     return onSuccess(response,
@@ -120,6 +122,7 @@ public class MonitoringRoutes extends AllDirectives {
      */
     private ExceptionHandler exceptionHandler() {
         return ExceptionHandler.newBuilder()
+                .match(BadDataException.class, obj -> complete(StatusCodes.BAD_REQUEST, obj.getMessage()))
                 .match(ResourceNotFoundException.class, obj -> complete(StatusCodes.NOT_FOUND, obj.getMessage()))
                 .match(Exception.class, obj -> {
                     if (obj != null) {

@@ -1,5 +1,7 @@
 package service.client.exceptions;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
@@ -24,6 +26,7 @@ import java.util.Map;
  */
 @ControllerAdvice
 public class ExceptionController {
+    private static Logger LOGGER = LoggerFactory.getLogger(ExceptionHandler.class);
 
     /**
      * Handle resource not found exception
@@ -95,6 +98,20 @@ public class ExceptionController {
     }
 
     /**
+     * Exception if monitoring service is not working correctly
+     *
+     * @param e        exception object
+     * @param response response object
+     * @throws IOException if not able to update the response object
+     */
+    @ExceptionHandler(MonitoringServiceException.class)
+    public void monitoringServiceException(Exception e, HttpServletResponse response) throws IOException {
+        LOGGER.error(String.format("Something bad happened:%s", e.getMessage()), e);
+        Utils.createJSONErrorResponse(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                e.getMessage(), response);
+    }
+
+    /**
      * A catch all block.
      *
      * @param e        exception object
@@ -103,7 +120,7 @@ public class ExceptionController {
      */
     @ExceptionHandler(Exception.class)
     public void handleAll(Exception e, HttpServletResponse response) throws IOException {
-        e.printStackTrace();
+        LOGGER.error(String.format("Something bad happened:%s", e.getMessage()), e);
         Utils.createJSONErrorResponse(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                 Constants.ErrorMsg.INTERNAL_SERVER_ERROR, response);
     }

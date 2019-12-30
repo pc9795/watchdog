@@ -46,6 +46,8 @@ public class MasterActor extends AbstractActor {
         this.lastRetrievedId = -1;
         this.pageable = PageRequest.of(0, workSize);
         this.bootWorkers(httpWorkerPool);
+        //Seed
+        getSelf().tell(new MonitoringProtocol.FindWork(), getSelf());
     }
 
     /**
@@ -125,8 +127,6 @@ public class MasterActor extends AbstractActor {
             //Create child actor
             ActorRef child = getContext().actorOf(MonitorWorkerActor.props(getSelf(), monitor));
             this.monitorToActor.put(monitor.getId(), child);
-            //Tell it to start work
-            child.tell(new MonitoringProtocol.StartWork(), getSelf());
         }
         getSelf().tell(new MonitoringProtocol.Wait(), getSelf());
         LOGGER.info("Work assignment completed...");
@@ -213,15 +213,8 @@ public class MasterActor extends AbstractActor {
                     String.format("%s is not handled by master with index:%s", id, this.index))), getSelf());
             return;
         }
-        LOGGER.info(String.format("Killing child worker working on monitor with id:%s", id));
-        getContext().stop(monitorToActor.get(id));
-        monitor.setId(id);
-        ActorRef child = getContext().actorOf(MonitorWorkerActor.props(getSelf(), monitor));
-        this.monitorToActor.put(monitor.getId(), child);
-        //Tell it to start work
-        child.tell(new MonitoringProtocol.StartWork(), getSelf());
-        LOGGER.info("Child worker recreated successfully...");
-        replyTo.tell(new MonitoringProtocol.EditMonitorResponse(monitor), getSelf());
+        LOGGER.info(String.format("Forwarding request to child actor with id:%s", id));
+        this.monitorToActor.get(id).tell(new MonitoringProtocol.EditMonitorRequest(id, monitor, replyTo), getSelf());
     }
 
     /**

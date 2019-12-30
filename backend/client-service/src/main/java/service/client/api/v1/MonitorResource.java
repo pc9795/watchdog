@@ -8,6 +8,8 @@ import core.entities.mongodb.MonitorLog;
 import core.repostiories.cockroachdb.MonitorRepository;
 import core.repostiories.cockroachdb.UserRepository;
 import core.repostiories.mongodb.MonitorLogRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,13 +28,11 @@ import java.util.List;
 
 /**
  * Purpose: REST resource for accessing monitor.
- * NOTE: we have not decided to put a status check on /GET/{id}, /PUT, and /DELETE as it causes no harm. There is no
- * meaning to edit, access or try to delete an already stopped monitor.
  **/
 @RestController
 @RequestMapping(Constants.ApiV1Resource.MONITORS)
 public class MonitorResource {
-
+    private static Logger LOGGER = LoggerFactory.getLogger(MonitorResource.class);
     private final MonitorRepository monitorRepository;
     private final UserRepository userRepository;
     private final MonitorLogRepository monitorLogRepository;
@@ -49,7 +49,7 @@ public class MonitorResource {
 
 
     /**
-     * Get all the active monitors for a user.
+     * Get all the monitors for a user.
      *
      * @param principal logged in user
      * @return list of monitors
@@ -123,6 +123,7 @@ public class MonitorResource {
             ((SocketMonitor) dbMonitor).setSocketPort(((SocketMonitor) monitor).getSocketPort());
         }
         if (!monitoringServiceClient.editMonitor(monitorId, dbMonitor)) {
+            LOGGER.error(String.format("Monitoring service is not able to edit monitor of id:%s", monitorId));
             throw new MonitoringServiceException("Could not able to edit the monitor right now!");
         }
         //Save
@@ -142,10 +143,11 @@ public class MonitorResource {
             throws ResourceNotFoundException, ForbiddenResourceException {
         BaseMonitor dbMonitor = getUsersMonitor(monitorId, principal.getName());
         if (!monitoringServiceClient.deleteMonitor(monitorId)) {
+            LOGGER.error(String.format("Monitoring service is not able to delete monitor of id:%s", monitorId));
             throw new MonitoringServiceException("Could not able to delete the monitor right now!");
         }
         //Delete
-        monitorRepository.delete(dbMonitor);
+//        monitorRepository.delete(dbMonitor);
     }
 
     /**

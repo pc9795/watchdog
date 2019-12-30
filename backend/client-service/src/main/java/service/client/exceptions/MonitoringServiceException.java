@@ -1,7 +1,7 @@
 package service.client.exceptions;
 
 /**
- * Purpose: TODO:
+ * Purpose: If monitoring service is not working correctly
  **/
 public class MonitoringServiceException extends RuntimeException {
     public MonitoringServiceException() {

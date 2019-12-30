@@ -59,7 +59,7 @@ services:
     ports:
       - "8081:8081"
     environment:
-      MONITORING_SERVICE_URL: localhost:8558/monitoring/workers/
+      MONITORING_SERVICE_URL: http://localhost:8558/monitoring/workers/
       COCKROACH_DB_URL: jdbc:postgresql://cockroach:26257/defaultdb
       COCKROACH_DB_USERNAME: root
       MONGO_DB_URL: mongodb://mongodb:27017/local

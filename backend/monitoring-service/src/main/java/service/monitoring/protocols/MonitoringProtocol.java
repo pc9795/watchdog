@@ -72,10 +72,17 @@ public class MonitoringProtocol {
     public static class EditMonitorRequest {
         private long id;
         private BaseMonitor monitor;
+        private ActorRef replyTo;
 
         public EditMonitorRequest(long id, BaseMonitor monitor) {
             this.id = id;
             this.monitor = monitor;
+        }
+
+        public EditMonitorRequest(long id, BaseMonitor monitor, ActorRef replyTo) {
+            this.id = id;
+            this.monitor = monitor;
+            this.replyTo = replyTo;
         }
 
 
@@ -85,6 +92,10 @@ public class MonitoringProtocol {
 
         public BaseMonitor getMonitor() {
             return monitor;
+        }
+
+        public ActorRef getReplyTo() {
+            return replyTo;
         }
     }
 

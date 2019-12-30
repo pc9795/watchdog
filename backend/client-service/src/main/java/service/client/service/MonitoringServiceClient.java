@@ -37,7 +37,7 @@ public class MonitoringServiceClient {
                     HttpMethod.PUT, new HttpEntity<>(mapper.writeValueAsString(monitor), headers), String.class);
 
         } catch (JsonProcessingException e) {
-            LOGGER.error(String.format("Error in converting to json:%s", e));
+            LOGGER.error(String.format("Error in converting to json:%s for monitor id:%s", e, monitorId));
             return false;
         }
         return responseEntity.getStatusCode().is2xxSuccessful();
@@ -48,7 +48,7 @@ public class MonitoringServiceClient {
         headers.setContentType(MediaType.APPLICATION_JSON);
         ResponseEntity<String> responseEntity;
         responseEntity = restTemplate.exchange(String.format("%s/%s", monitoringServiceUrl, monitorId),
-                HttpMethod.PUT, new HttpEntity<>("", headers), String.class);
+                HttpMethod.DELETE, new HttpEntity<>("", headers), String.class);
 
         return responseEntity.getStatusCode().is2xxSuccessful();
     }

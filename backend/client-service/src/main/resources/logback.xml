@@ -5,9 +5,9 @@
         </encoder>
     </appender>
     <appender name="FILE-ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>monitoring-service.log</file>
+        <file>client-service.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>monitoring-service-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>client-service-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <!-- each archived file, size max 10MB -->
             <maxFileSize>10MB</maxFileSize>
             <!-- total size of all archive files, if total size > 50MB, it will delete old archived file -->

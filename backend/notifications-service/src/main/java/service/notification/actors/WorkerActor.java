@@ -25,6 +25,10 @@ public class WorkerActor extends AbstractActor {
         return Props.create(WorkerActor.class);
     }
 
+    WorkerActor() {
+        LOGGER.warn(String.format("Actor created:%s", getSelf().toString()));
+    }
+
     /**
      * Configure what action on what messages.
      *

@@ -48,7 +48,7 @@ Path|HTTP method|Required form fields|Description
 /cluster/shards/{name}|GET|None	|Returns shard info for the shard region with the provided {name}
 /monitoring/workers/{monitor_id}|PUT|`core.entities.cocroachdb.BaseMonitor` in JSON|Edit the worker actor with the given monitor
 /monitoring/workers/{monitor_id}|DELETE|None|Delete the worker actor with the given monitor
-/monitoring/workers/|GET|None|All the workers assigned to particular node
+/monitoring/workers/|GET|None|All the workers assigned to particular node; NOTE: This api is only for development purposes to debug as workers can go beyond thousands in real scenario.
 /monitoring/workers/{monitor_id}|GET|None|Get the worker assigned to particular monitor
 
 **Actors Fault Tolerance**

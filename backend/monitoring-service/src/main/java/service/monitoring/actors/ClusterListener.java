@@ -4,18 +4,22 @@ import akka.actor.AbstractActor;
 import akka.actor.Props;
 import akka.cluster.Cluster;
 import akka.cluster.ClusterEvent;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Purpose: Listener to log cluster events.
  **/
 public class ClusterListener extends AbstractActor {
-    private static final Logger LOGGER = LogManager.getLogger(ClusterListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterListener.class);
     private Cluster cluster = Cluster.get(getContext().getSystem());
 
     public static Props props() {
         return Props.create(ClusterListener.class);
+    }
+
+    ClusterListener() {
+        LOGGER.warn(String.format("Actor created:%s", getSelf().toString()));
     }
 
     /**

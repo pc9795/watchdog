@@ -57,10 +57,8 @@ public class Main {
     private static void startActorSystem() {
         ActorSystem system = ActorSystem.create("notificationActorSystem");//Create the actor system
         system.actorOf(ClusterListener.props(), Constants.CLUSTER_LISTENER_ACTOR_NAME);//listener actor
-        LOGGER.info("Cluster listener actor created...");
         //Create the node actor which represent a single entity in the cluster
         ActorRef node = system.actorOf(ClusterNode.props(Constants.workers), "node");
-        LOGGER.info("Node actor is created...");
         //Get management routes from AkkaManagement module.
         Route managementRoutes = AkkaManagement.get(system).getRoutes();
 

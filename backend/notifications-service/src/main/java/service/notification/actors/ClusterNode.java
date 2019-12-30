@@ -29,11 +29,11 @@ public class ClusterNode extends AbstractActor {
     public ClusterNode(int workers) {
         //Create the master actor for router to work
         getContext().actorOf(MasterActor.props(workers), Constants.MASTER_ACTOR_NAME);
-        LOGGER.info("Master actor created...");
         //Get the router actor from configuration
         //Have to create master router first as it will look for its routees immediately
         this.router = getContext().actorOf(FromConfig.getInstance().props(Props.empty()), Constants.ROUTER_ACTOR_NAME);
-        LOGGER.info("Router actor created...");
+        LOGGER.warn("Router actor created...");
+        LOGGER.warn(String.format("Actor created:%s", getSelf().toString()));
     }
 
     /**

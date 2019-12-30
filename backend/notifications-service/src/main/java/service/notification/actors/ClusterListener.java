@@ -23,6 +23,10 @@ public class ClusterListener extends AbstractActor {
         return Props.create(ClusterListener.class);
     }
 
+    ClusterListener() {
+        LOGGER.warn(String.format("Actor created:%s", getSelf().toString()));
+    }
+
     /**
      * Before start hook
      *

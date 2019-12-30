@@ -90,7 +90,15 @@ public class MonitoringProtocol {
 
 
     public static class EditMonitorResponse {
+        private BaseMonitor monitor;
 
+        public EditMonitorResponse(BaseMonitor monitor) {
+            this.monitor = monitor;
+        }
+
+        public BaseMonitor getMonitor() {
+            return monitor;
+        }
     }
 
     public static class DeleteMonitorRequest {

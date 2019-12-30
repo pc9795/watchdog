@@ -82,7 +82,7 @@ public class MonitorLog {
     }
 
     public boolean isWorking() {
-        return !this.errorMessage.isEmpty();
+        return this.errorMessage.isEmpty();
     }
 
     @Override

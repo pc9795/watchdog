@@ -6,21 +6,24 @@ import core.entities.cockroachdb.BaseMonitor;
 import core.entities.mongodb.MonitorLog;
 import core.repostiories.cockroachdb.MonitorRepository;
 import core.repostiories.mongodb.MonitorLogRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import service.monitoring.exceptions.ResourceNotFoundException;
 import service.monitoring.protocols.MonitoringProtocol;
 
 import java.time.Duration;
+import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Purpose: Master actor which will control child actors for work
  **/
 public class MasterActor extends AbstractActor {
-    private static Logger LOG = Logger.getLogger(MasterActor.class.toString()); //Logger object
+    private static Logger LOGGER = LoggerFactory.getLogger(MasterActor.class); //Logger object
     private MonitorRepository monitorRepository;  //Access monitors
     private MonitorLogRepository monitorLogRepository; //Access monitor logs
     private int pollingInterval; //Interval at which master actor will check for work
@@ -29,9 +32,11 @@ public class MasterActor extends AbstractActor {
     private int index; //What is the no of this master
     private long lastRetrievedId; //What was the last retrieved id
     private Pageable pageable; //How many results to extract from the database at a time.
+    private static ArrayDeque<ActorRef> httpWorkersQueue = new ArrayDeque<>(); //Queue of http workers
 
     public MasterActor(MonitorRepository monitorRepository, MonitorLogRepository monitorLogRepository,
-                       int pollingInterval, int masterCount, int index, int workSize) {
+                       int pollingInterval, int masterCount, int index, int workSize, int httpWorkerPool) {
+        LOGGER.warn(String.format("Actor created:%s", getSelf().toString()));
         this.monitorRepository = monitorRepository;
         this.monitorLogRepository = monitorLogRepository;
         this.pollingInterval = pollingInterval;
@@ -40,6 +45,7 @@ public class MasterActor extends AbstractActor {
         this.index = index;
         this.lastRetrievedId = -1;
         this.pageable = PageRequest.of(0, workSize);
+        this.bootWorkers(httpWorkerPool);
     }
 
     /**
@@ -53,10 +59,10 @@ public class MasterActor extends AbstractActor {
      * @param workSize             no of records to pull
      * @return configuration object
      */
-    public static Props props(MonitorRepository monitorRepository, MonitorLogRepository monitorLogRepository,
-                              int pollingInterval, int masterCount, int index, int workSize) {
+    static Props props(MonitorRepository monitorRepository, MonitorLogRepository monitorLogRepository,
+                       int pollingInterval, int masterCount, int index, int workSize, int httpWorkerPool) {
         return Props.create(MasterActor.class, monitorRepository, monitorLogRepository,
-                pollingInterval, masterCount, index, workSize);
+                pollingInterval, masterCount, index, workSize, httpWorkerPool);
     }
 
     /**
@@ -80,17 +86,30 @@ public class MasterActor extends AbstractActor {
     }
 
     /**
+     * Create a queue of workers.
+     *
+     * @param workers no of workers
+     */
+    private void bootWorkers(int workers) {
+        LOGGER.info(String.format("Master actor is booting %s http workers", workers));
+        while (workers-- > 0) {
+            httpWorkersQueue.addLast(getContext().actorOf(HttpWorkerActor.props()));
+        }
+    }
+
+    /**
      * Check the cockroach db for work
      */
     private void findWork() {
-        LOG.info("Finding Work...");
+        LOGGER.info("Finding Work...");
         List<BaseMonitor> monitors = this.monitorRepository.findWorkForMaster(this.pageable, lastRetrievedId,
                 masterCount, index);
-        LOG.info(String.format("Work found: %s", monitors.size()));
+        LOGGER.info(String.format("Work found: %s", monitors.size()));
         //Update the latest monitor id for next query
         if (monitors.size() != 0) {
             lastRetrievedId = monitors.get(monitors.size() - 1).getId();
         }
+        LOGGER.info(String.format("Updated last retrieved id:%s", lastRetrievedId));
         //Message to self to assign work
         getSelf().tell(new MonitoringProtocol.AssignWork(monitors), getSelf());
     }
@@ -101,7 +120,7 @@ public class MasterActor extends AbstractActor {
      * @param monitors list of monitors
      */
     private void assignWork(List<BaseMonitor> monitors) {
-        LOG.info("Assigning Work...");
+        LOGGER.info("Assigning Work...");
         for (BaseMonitor monitor : monitors) {
             //Create child actor
             ActorRef child = getContext().actorOf(MonitorWorkerActor.props(getSelf(), monitor));
@@ -110,13 +129,14 @@ public class MasterActor extends AbstractActor {
             child.tell(new MonitoringProtocol.StartWork(), getSelf());
         }
         getSelf().tell(new MonitoringProtocol.Wait(), getSelf());
+        LOGGER.info("Work assignment completed...");
     }
 
     /**
      * Wait for some time before looking for work
      */
     private void waitForSomeTime() {
-        LOG.info("Going to Wait...");
+        LOGGER.info("Going to Wait...");
         ActorSystem system = getContext().system();
         //Schedule a message to find work after a waiting time.
         system.scheduler().scheduleOnce(Duration.ofSeconds(this.pollingInterval), () ->
@@ -129,56 +149,101 @@ public class MasterActor extends AbstractActor {
      * @param monitorLog monitor log object
      */
     private void updateLog(MonitorLog monitorLog, BaseMonitor monitor) {
-        LOG.info(String.format("Updating Log...%s", monitorLog.toString()));
+        LOGGER.info(String.format("Updating Log...%s", monitorLog.toString()));
         monitorLogRepository.save(monitorLog);
         if (monitorLog.isWorking()) {
             return;
         }
+        LOGGER.warn(String.format("Monitor is not working:%s", monitor));
+        LOGGER.warn(String.format("Error message:%s", monitorLog.getErrorMessage()));
         EmailMessage message =
                 new EmailMessage(monitor.getUser().getEmail(), monitor.getName(), monitorLog.getErrorMessage());
-        ActorRef httpWorker = getContext().actorOf(HttpWorkerActor.props());
-        httpWorker.tell(new MonitoringProtocol.NotifyEmail(message), getSelf());
+        LOGGER.warn("Going to assign an email message to an http worker");
+        httpWorkersQueue.peekFirst().tell(new MonitoringProtocol.NotifyEmail(message), getSelf());
+        //Round robin
+        httpWorkersQueue.addLast(httpWorkersQueue.removeFirst());
     }
 
+    /**
+     * Delete worker corresponding to a given monitor id
+     *
+     * @param id      id of the monitor
+     * @param replyTo actor to reply
+     */
     private void deleteWork(long id, ActorRef replyTo) {
         if (id % this.masterCount != this.index) {
+            LOGGER.info(String.format("Monitor with id:%s doesn't belong to this master with index:%s", id, this.index));
             //Not belong to this master
             return;
         }
         if (!monitorToActor.containsKey(id)) {
             //If this is the master and this work is not handled by it.
-            replyTo.tell(new Status.Failure(new Exception(String.format("Monitor with id:%s is currently not handled by " +
-                    "this master", id))), getSelf());
+            LOGGER.warn(String.format("Monitor with id:%s should be handled by this master with index:%s but " +
+                    "corresponding worker actor dosen't exists. Strange Behavior!", id, this.index));
+            replyTo.tell(new Status.Failure(new ResourceNotFoundException(
+                    String.format("%s is not handled by master with index:%s", id, this.index))), getSelf());
             return;
         }
+        LOGGER.info(String.format("Killing child worker working on monitor with id:%s", id));
         getContext().stop(monitorToActor.get(id));
+        monitorToActor.remove(id);
+        LOGGER.info("Child worker deleted successfully...");
         replyTo.tell(new MonitoringProtocol.DeleteMonitorResponse(), getSelf());
     }
 
+    /**
+     * Edit the monitor assigned to the worker corresponding to given id.
+     *
+     * @param id      id of the monitor
+     * @param monitor updated details
+     * @param replyTo actor to reply
+     */
     private void editWork(long id, BaseMonitor monitor, ActorRef replyTo) {
         if (id % this.masterCount != this.index) {
+            LOGGER.info(String.format("Monitor with id:%s doesn't belong to this master with index:%s", id, this.index));
             //Not belong to this master
             return;
         }
         if (!monitorToActor.containsKey(id)) {
             //If this is the master and this work is not handled by it.
-            replyTo.tell(new Status.Failure(new Exception(String.format("Monitor with id:%s is currently not handled by " +
-                    "this master", id))), getSelf());
+            LOGGER.warn(String.format("Monitor with id:%s should be handled by this master with index:%s but " +
+                    "corresponding worker actor dosen't exists. Strange Behavior!", id, this.index));
+            //In this case user can just delete the monitor and create new one.
+            replyTo.tell(new Status.Failure(new ResourceNotFoundException(
+                    String.format("%s is not handled by master with index:%s", id, this.index))), getSelf());
             return;
         }
+        LOGGER.info(String.format("Killing child worker working on monitor with id:%s", id));
         getContext().stop(monitorToActor.get(id));
+        monitor.setId(id);
         ActorRef child = getContext().actorOf(MonitorWorkerActor.props(getSelf(), monitor));
         this.monitorToActor.put(monitor.getId(), child);
-        replyTo.tell(new MonitoringProtocol.EditMonitorResponse(), getSelf());
+        //Tell it to start work
+        child.tell(new MonitoringProtocol.StartWork(), getSelf());
+        LOGGER.info("Child worker recreated successfully...");
+        replyTo.tell(new MonitoringProtocol.EditMonitorResponse(monitor), getSelf());
     }
 
+    /**
+     * Send the details of this monitors child workers
+     *
+     * @param replyTo actor to reply
+     */
     private void status(ActorRef replyTo) {
         replyTo.tell(new MonitoringProtocol.StatusMasterResponse(this.index, this.monitorToActor.keySet()), getSelf());
     }
 
+    /**
+     * Forward the message to get the status corresponding child
+     *
+     * @param id      id of the monitor handled by the child
+     * @param replyTo actor to reply
+     */
     private void childStatus(long id, ActorRef replyTo) {
         if (!this.monitorToActor.containsKey(id)) {
-            replyTo.tell(new Status.Failure(new Exception(
+            LOGGER.warn(String.format("Monitor with id:%s should be handled by this master with index:%s but " +
+                    "corresponding worker actor dosen't exists. Strange Behavior!", id, this.index));
+            replyTo.tell(new Status.Failure(new ResourceNotFoundException(
                     String.format("%s is not handled by master with index:%s", id, this.index))), getSelf());
             return;
         }

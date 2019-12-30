@@ -10,20 +10,24 @@ import akka.http.javadsl.model.HttpResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import core.beans.EmailMessage;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import service.monitoring.protocols.MonitoringProtocol;
 import service.monitoring.utils.Constants;
 
 /**
- * Purpose: TODO:
+ * Purpose: Actor responsible to communicate with notifications-service to send notifications.
  **/
 public class HttpWorkerActor extends AbstractActor {
-    private static Logger LOGGER = LogManager.getLogger(HttpWorkerActor.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(HttpWorkerActor.class);
     private static ObjectMapper mapper = new ObjectMapper();
 
-    public static Props props() {
+    static Props props() {
         return Props.create(HttpWorkerActor.class);
+    }
+
+    HttpWorkerActor() {
+        LOGGER.warn(String.format("Actor created:%s", getSelf().toString()));
     }
 
     @Override
@@ -35,24 +39,33 @@ public class HttpWorkerActor extends AbstractActor {
     }
 
     private void notifyEmail(EmailMessage message) {
+        LOGGER.info(String.format("Going to send message: %s", message));
         HttpRequest request;
         try {
             request = HttpRequest.POST(Constants.notifyMessageURL).
                     withEntity(HttpEntities.create(ContentTypes.APPLICATION_JSON, mapper.writeValueAsString(message)));
 
+
+            //Right now we are executing a synchronous call we can pipe this response back to this actor to do it
+            //asynchronously.
+            HttpResponse response = Http.get(getContext().getSystem()).singleRequest(request).
+                    toCompletableFuture().join();
+
+            if (response.status().isFailure()) {
+                //Currently we are just logging about delivery failures. In future we can store them in database and
+                //can show it on front-end. Or we can implement some advanced handling.
+                LOGGER.error("Delivery of email: %s failed with status code: %s, and message: %s", message,
+                        response.entity(), response.entity());
+            } else {
+                LOGGER.info(String.format("Email message is submitted successfully to notifications-service:%s", message));
+            }
+
+            //Currently we are just logging about delivery failures. In future we can store them in database and
+            // can show it on front-end. Or we can implement some advanced handling.
         } catch (JsonProcessingException e) {
-            //Currently we are just logging about delivery failures. In future we can show them as events
             LOGGER.error(String.format("Error in converting to JSON: %s", message), e);
-            return;
+        } catch (Exception e) {
+            LOGGER.error(String.format("Error in sending message:%s", message), e);
         }
-        //Right now we are executing a synchronous call we can pipe this response back to this actor to do it
-        //asynchronously.
-        HttpResponse response = Http.get(getContext().getSystem()).singleRequest(request).toCompletableFuture().join();
-        if (response.status().isFailure()) {
-            //Currently we are just logging about delivery failures. In future we can show them as events
-            LOGGER.error("Delivery of email: %s failed", message);
-        }
-        //Stop itself
-        getContext().stop(getSelf());
     }
 }

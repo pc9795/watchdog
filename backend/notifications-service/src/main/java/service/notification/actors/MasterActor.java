@@ -18,6 +18,7 @@ public class MasterActor extends AbstractActor {
     private static ArrayDeque<ActorRef> workerQueue = new ArrayDeque<>(); //Queue of workers
 
     public MasterActor(int workers) {
+        LOGGER.warn(String.format("Actor created:%s", getSelf().toString()));
         this.bootWorkers(workers);
     }
 

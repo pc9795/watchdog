@@ -5,8 +5,8 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.Status;
 import core.beans.EmailMessage;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import service.notification.protocols.NotificationProtocol;
 import service.notification.utils.Utils;
 
@@ -14,7 +14,7 @@ import service.notification.utils.Utils;
  * Purpose: The actor which implement all the primitive actions
  **/
 public class WorkerActor extends AbstractActor {
-    private static Logger LOGGER = LogManager.getLogger(WorkerActor.class); //Logger object
+    private static Logger LOGGER = LoggerFactory.getLogger(WorkerActor.class); //Logger object
 
     /**
      * Actor configuration object

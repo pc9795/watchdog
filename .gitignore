@@ -55,3 +55,4 @@ static/
 
 # Deployment related
 backend.7z
+monitoring-service.log

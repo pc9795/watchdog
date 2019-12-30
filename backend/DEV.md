@@ -50,3 +50,16 @@ Path|HTTP method|Required form fields|Description
 /monitoring/workers/{monitor_id}|DELETE|None|Delete the worker actor with the given monitor
 /monitoring/workers/|GET|None|All the workers assigned to particular node
 /monitoring/workers/{monitor_id}|GET|None|Get the worker assigned to particular monitor
+
+**Actors Fault Tolerance**
+
+Default Supervisor Strategy is used - Escalate is used if the defined strategy doesn’t cover the exception that was thrown.
+
+When the supervisor strategy is not defined for an actor the following exceptions are handled by default:
+* `ActorInitializationException` will stop the failing child actor
+* `ActorKilledException` will stop the failing child actor
+* `DeathPactException` will stop the failing child actor
+* `Exception` will restart the failing child actor
+* Other types of `Throwable` will be escalated to parent actor
+
+If the exception escalate all the way up to the root guardian it will handle it in the same way as the default strategy defined above.

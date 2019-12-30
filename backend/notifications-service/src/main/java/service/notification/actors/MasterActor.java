@@ -4,6 +4,8 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import core.beans.EmailMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import service.notification.protocols.NotificationProtocol;
 
 import java.util.ArrayDeque;
@@ -12,6 +14,7 @@ import java.util.ArrayDeque;
  * Purpose: Master actor which will maintain a list of workers to assign tasks.
  **/
 public class MasterActor extends AbstractActor {
+    private static Logger LOGGER = LoggerFactory.getLogger(MasterActor.class);
     private static ArrayDeque<ActorRef> workerQueue = new ArrayDeque<>(); //Queue of workers
 
     public MasterActor(int workers) {
@@ -50,6 +53,7 @@ public class MasterActor extends AbstractActor {
      * @param workers no of workers
      */
     private void bootWorkers(int workers) {
+        LOGGER.info(String.format("Master actor is booting %s workers", workers));
         while (workers-- > 0) {
             workerQueue.addLast(getContext().actorOf(WorkerActor.props()));
         }
@@ -62,6 +66,7 @@ public class MasterActor extends AbstractActor {
      * @param replyTo worker should directly apply to the assigner of the work(wo gave it to master)
      */
     private void notifyViaEmail(EmailMessage message, ActorRef replyTo) {
+        LOGGER.info(String.format("Master actor assigning an email to child: %s", message));
         workerQueue.peekFirst().tell(new NotificationProtocol.NotifyEmail(message, replyTo), getSelf());
         //Round robin
         workerQueue.addLast(workerQueue.removeFirst());

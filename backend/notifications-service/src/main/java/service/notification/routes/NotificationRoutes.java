@@ -49,7 +49,7 @@ public class NotificationRoutes extends AllDirectives {
                         () -> entity(Jackson.unmarshaller(EmailMessage.class), msg -> {
                             CompletionStage<?> response = notify(msg);
                             return onSuccess(response, done ->
-                                    complete(StatusCodes.OK)
+                                    complete(StatusCodes.CREATED)
                             );
                         }))
                 )));

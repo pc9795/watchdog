@@ -4,12 +4,16 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.routing.FromConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import service.notification.protocols.NotificationProtocol;
+import service.notification.utils.Constants;
 
 /**
  * Purpose: Actor which represent a single node in the cluster.
  **/
 public class ClusterNode extends AbstractActor {
+    private static Logger LOGGER = LoggerFactory.getLogger(ClusterNode.class);
     private ActorRef router;
 
     /**
@@ -24,10 +28,12 @@ public class ClusterNode extends AbstractActor {
 
     public ClusterNode(int workers) {
         //Create the master actor for router to work
-        getContext().actorOf(MasterActor.props(workers), "master");
+        getContext().actorOf(MasterActor.props(workers), Constants.MASTER_ACTOR_NAME);
+        LOGGER.info("Master actor created...");
         //Get the router actor from configuration
         //Have to create master router first as it will look for its routees immediately
-        this.router = getContext().actorOf(FromConfig.getInstance().props(Props.empty()), "router");
+        this.router = getContext().actorOf(FromConfig.getInstance().props(Props.empty()), Constants.ROUTER_ACTOR_NAME);
+        LOGGER.info("Router actor created...");
     }
 
     /**

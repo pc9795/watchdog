@@ -11,8 +11,8 @@ import akka.http.javadsl.server.Route;
 import akka.management.javadsl.AkkaManagement;
 import akka.stream.Materializer;
 import akka.stream.javadsl.Flow;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import service.notification.actors.ClusterListener;
 import service.notification.actors.ClusterNode;
 import service.notification.routes.NotificationRoutes;
@@ -31,10 +31,11 @@ import static akka.http.javadsl.server.Directives.concat;
  * Purpose: Entry point for the program.
  **/
 public class Main {
-    private static Logger LOGGER = LogManager.getLogger(Main.class);
+
+    private static Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
     /**
-     * Maiin function
+     * Main function
      *
      * @param args command line arguments
      */
@@ -55,15 +56,17 @@ public class Main {
      */
     private static void startActorSystem() {
         ActorSystem system = ActorSystem.create("notificationActorSystem");//Create the actor system
-        system.actorOf(ClusterListener.props(), "clusterListener");//listener actor
+        system.actorOf(ClusterListener.props(), Constants.CLUSTER_LISTENER_ACTOR_NAME);//listener actor
+        LOGGER.info("Cluster listener actor created...");
         //Create the node actor which represent a single entity in the cluster
         ActorRef node = system.actorOf(ClusterNode.props(Constants.workers), "node");
-
+        LOGGER.info("Node actor is created...");
         //Get management routes from AkkaManagement module.
         Route managementRoutes = AkkaManagement.get(system).getRoutes();
 
         //Get the routes for notification
         Duration askTimeout = system.settings().config().getDuration("akka.routes.ask-timeout");
+        LOGGER.info(String.format("Ask time out retrieved:%s", askTimeout));
         NotificationRoutes notificationRoutes = new NotificationRoutes(node, askTimeout);
 
         //Setup http server
@@ -86,7 +89,7 @@ public class Main {
         //Loading config from properties file.
         Properties config = new Properties();
         config.load(Main.class.getClassLoader().getResourceAsStream(Constants.configFile));
-
+        LOGGER.info("Properties file is loaded successfully...");
         //Updating config.
         Constants.emailProperties.put("mail.smtp.host", config.getProperty("mail.smtp.host").trim());
         Constants.emailProperties.put("mail.smtp.port", config.getProperty("mail.smtp.port").trim());
@@ -98,12 +101,13 @@ public class Main {
         Constants.workers = Integer.parseInt(config.getProperty("workers").trim());
         //Get password from environment variable.
         String password = System.getenv("WATCHDOG_EMAIL_PASSWORD");
-
+        LOGGER.info("Password is retrieved from environment variable...");
         Constants.emailSession = Session.getInstance(Constants.emailProperties, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(Constants.emailUsername, password);
             }
         });
+        LOGGER.info("Session is created to sending email and used by all workers...");
     }
 }

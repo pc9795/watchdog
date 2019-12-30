@@ -12,6 +12,9 @@ public final class Constants {
 
     public static final String configFile = "watchdog.properties";
     public static final Properties emailProperties = new Properties();
+    public static final String MASTER_ACTOR_NAME = "master";
+    public static final String ROUTER_ACTOR_NAME = "router";
+    public static final String CLUSTER_LISTENER_ACTOR_NAME = "clusterListener";
 
     //Not final as configured by properties file.
     public static String emailUsername;

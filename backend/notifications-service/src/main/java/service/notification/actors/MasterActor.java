@@ -1,13 +1,13 @@
 package service.notification.actors;
 
-import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
-import akka.actor.Props;
+import akka.actor.*;
+import akka.japi.pf.DeciderBuilder;
 import core.beans.EmailMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.notification.protocols.NotificationProtocol;
 
+import java.time.Duration;
 import java.util.ArrayDeque;
 
 /**
@@ -20,6 +20,23 @@ public class MasterActor extends AbstractActor {
     public MasterActor(int workers) {
         LOGGER.warn(String.format("Actor created:%s", getSelf().toString()));
         this.bootWorkers(workers);
+    }
+
+    // supervision stratagy strategy
+    private static SupervisorStrategy strategy =
+            new OneForOneStrategy(
+                    10,
+                    Duration.ofMinutes(1),
+                    DeciderBuilder
+                            .match(ArithmeticException.class, e -> SupervisorStrategy.resume())
+                            .match(NullPointerException.class, e -> SupervisorStrategy.restart())
+                            .match(IllegalArgumentException.class, e -> SupervisorStrategy.stop())
+                            .matchAny(o -> SupervisorStrategy.escalate())
+                            .build());
+
+    @Override
+    public SupervisorStrategy supervisorStrategy() {
+        return strategy;
     }
 
     /**

@@ -1,4 +1,4 @@
-#Steps to run the project
+## Steps to run the project
 ## Prerequisites
 ### 1. Install Maven
 Check installation is working by `maven --version`. Our version is 3.5.2.

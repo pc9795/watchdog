@@ -1,4 +1,3 @@
-## Steps to run the project
 ## Prerequisites
 ### 1. Install Maven
 Check installation is working by `maven --version`. Our version is 3.5.2.
@@ -31,7 +30,7 @@ Docker-compose configuration for starting a single node mongodb cluster without 
 ```
 
 
-## Run system locally
+## Run locally
 We have created a script `local_run.sh` to automate this process. But as this script will run 4 processes in backend:
 client-service, monitoring-service, notifications-service and frontend so the logs could be intermingled. In case of 
 any failures it will be hard too debug so following are detail steps used in script. Anyways you can use that script
@@ -108,7 +107,7 @@ or you can reach out to us.
 
 Access the application at `192.168.99.100:8081`. NOTE: We are using docker toolbox so adjust you URL accordingly.
 
-## Deploy on AWS instance
+## Deploy on AWS
 ### 1. Create an AWS instance
 Create an AWS EC2 instance with Ubuntu 64 bit AMI and t2.small instance with 2 GB ram.
 ### 2. Update AWS url in front-end
